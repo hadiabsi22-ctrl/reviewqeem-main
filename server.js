@@ -12,8 +12,8 @@ const PORT = process.env.PORT || 8093;
 
 // تحديد بيئة التشغيل - تأكد من أن NODE_ENV معرّف
 // في Vercel، NODE_ENV قد يكون غير معرّف، لذا نستخدم قيمة افتراضية
-// نستخدم process.env.NODE_ENV مباشرة في كل موضع لتجنب مشاكل الـ scope
 const NODE_ENV = process.env.NODE_ENV || 'production';
+const isDevelopment = NODE_ENV !== 'production';
 
 // ==================== CORS Configuration ====================
 // إعداد CORS آمن - يسمح فقط بالنطاقات المصرح بها
