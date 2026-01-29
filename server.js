@@ -94,6 +94,13 @@ app.get('/api/health', (req, res) => {
 });
 
 // ==================== Static Files & SEO ====================
+// خدمة ملفات الرفع (uploads) قبل express.static العام
+app.use('/uploads', express.static(path.join(__dirname, 'uploads'), {
+  maxAge: '1y',
+  etag: true,
+  lastModified: true
+}));
+
 app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
 
 app.use(express.static(path.join(__dirname), {
