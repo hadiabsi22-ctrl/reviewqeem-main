@@ -11,8 +11,14 @@ const app = express();
 const PORT = process.env.PORT || 8093;
 
 // تحديد بيئة التشغيل - تأكد من أن NODE_ENV معرّف
+// في Vercel، NODE_ENV قد يكون غير معرّف، لذا نستخدم قيمة افتراضية
 const NODE_ENV = process.env.NODE_ENV || 'production';
-const isDevelopment = NODE_ENV !== 'production';
+const isDevelopment = (NODE_ENV !== 'production' && NODE_ENV !== 'PRODUCTION');
+
+// تأكد من أن isDevelopment معرّف دائماً
+if (typeof isDevelopment === 'undefined') {
+  throw new Error('isDevelopment is undefined - NODE_ENV: ' + NODE_ENV);
+}
 
 // ==================== CORS Configuration ====================
 // إعداد CORS آمن - يسمح فقط بالنطاقات المصرح بها
