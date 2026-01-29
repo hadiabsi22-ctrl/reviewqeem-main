@@ -2,6 +2,7 @@ const express = require('express');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const sharp = require('sharp');
 const { fileTypeFromBuffer } = require('file-type');
 const { createClient } = require('@supabase/supabase-js');
 const { authenticate, isAdmin } = require('../middleware/auth');
@@ -43,6 +44,59 @@ const upload = multer({
   },
   fileFilter
 });
+
+// ==================== دالة إضافة Watermark ====================
+async function addWatermark(imageBuffer, watermarkPath) {
+  try {
+    // تحميل الصورة الأصلية
+    const image = sharp(imageBuffer);
+    const metadata = await image.metadata();
+    
+    // حساب حجم Watermark (10% من عرض الصورة)
+    const watermarkSize = Math.floor(metadata.width * 0.1);
+    
+    // تحميل Watermark إذا كان موجوداً
+    let watermarkBuffer = null;
+    if (fs.existsSync(watermarkPath)) {
+      watermarkBuffer = await sharp(watermarkPath)
+        .resize(watermarkSize, null, { fit: 'inside', withoutEnlargement: true })
+        .png()
+        .toBuffer();
+    } else {
+      // إنشاء Watermark نصي إذا لم يكن الملف موجوداً
+      const svgText = `
+        <svg width="${watermarkSize}" height="${Math.floor(watermarkSize * 0.3)}" xmlns="http://www.w3.org/2000/svg">
+          <text x="50%" y="50%" font-family="Arial, sans-serif" font-size="${Math.floor(watermarkSize * 0.15)}" 
+                fill="rgba(255,255,255,0.7)" text-anchor="middle" dominant-baseline="middle" 
+                font-weight="bold">ReviewQeem</text>
+        </svg>
+      `;
+      watermarkBuffer = Buffer.from(svgText);
+    }
+    
+    // حساب موضع Watermark (الزاوية اليمنى السفلية مع هامش 20px)
+    const watermarkMetadata = await sharp(watermarkBuffer).metadata();
+    const left = metadata.width - watermarkMetadata.width - 20;
+    const top = metadata.height - watermarkMetadata.height - 20;
+    
+    // دمج Watermark مع الصورة
+    const watermarkedImage = await image
+      .composite([{
+        input: watermarkBuffer,
+        left: left,
+        top: top,
+        blend: 'over'
+      }])
+      .jpeg({ quality: 90 })
+      .toBuffer();
+    
+    return watermarkedImage;
+  } catch (error) {
+    console.error('خطأ في إضافة Watermark:', error);
+    // في حالة الخطأ، نعيد الصورة الأصلية
+    return imageBuffer;
+  }
+}
 
 // Single file upload (admin only) - نحفظ الصورة محلياً داخل مجلد /uploads
 router.post('/single', authenticate, isAdmin, upload.single('image'), async (req, res) => {
@@ -91,8 +145,18 @@ router.post('/single', authenticate, isAdmin, upload.single('image'), async (req
       fs.mkdirSync(uploadsDir, { recursive: true });
     }
 
+    // إضافة Watermark على الصورة
+    const watermarkPath = path.join(__dirname, '..', 'images', 'logo-watermark.png');
+    let processedBuffer = req.file.buffer;
+    
+    try {
+      processedBuffer = await addWatermark(req.file.buffer, watermarkPath);
+    } catch (watermarkError) {
+      console.warn('⚠️  تحذير: فشل إضافة Watermark، سيتم حفظ الصورة بدون Watermark:', watermarkError.message);
+    }
+
     const filePath = path.join(uploadsDir, fileName);
-    await fs.promises.writeFile(filePath, req.file.buffer);
+    await fs.promises.writeFile(filePath, processedBuffer);
 
     // رابط نسبي داخل الموقع (يتم خدمته من server.js عبر app.use('/uploads', express.static(...)))
     const publicUrl = `/uploads/covers/${fileName}`;
@@ -147,7 +211,17 @@ router.post('/multiple', authenticate, isAdmin, upload.array('images', 10), asyn
       const filePath = path.join(screenshotsDir, fileName);
 
       try {
-        await fs.promises.writeFile(filePath, file.buffer);
+        // إضافة Watermark على الصورة
+        const watermarkPath = path.join(__dirname, '..', 'images', 'logo-watermark.png');
+        let processedBuffer = file.buffer;
+        
+        try {
+          processedBuffer = await addWatermark(file.buffer, watermarkPath);
+        } catch (watermarkError) {
+          console.warn('⚠️  تحذير: فشل إضافة Watermark، سيتم حفظ الصورة بدون Watermark:', watermarkError.message);
+        }
+        
+        await fs.promises.writeFile(filePath, processedBuffer);
 
         const publicUrl = `/uploads/screenshots/${fileName}`;
 

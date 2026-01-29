@@ -550,6 +550,12 @@
             display: block;
             margin: 20px auto;
             box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            /* حماية الصور - منع السحب والنقر اليمين */
+            pointer-events: none;
+            user-select: none;
+            -webkit-user-drag: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
         }
 
         /* حاوية الصور - للتنسيق الإضافي */
@@ -1581,6 +1587,24 @@
             .btn-submit {
                 width: 100%;
             }
+
+            /* تنسيق الصور للشاشات الصغيرة جداً */
+            .review-body img,
+            .review-body img.content-img,
+            .review-body .content-img,
+            .inline-review-img,
+            .image-container img {
+                max-width: 100%;
+                border-radius: 8px;
+                margin: 10px auto;
+                aspect-ratio: auto;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            }
+
+            .image-container {
+                max-width: 100%;
+                margin: 10px auto;
+            }
         }
 
         /* ========== ANIMATIONS ========== */
@@ -2224,10 +2248,12 @@
       if (reviewImage) {
           if (currentReview.cover_image || currentReview.coverImage) {
               reviewImage.src = currentReview.cover_image || currentReview.coverImage;
-              reviewImage.alt = `غلاف ${currentReview.title || ''}`;
+              reviewImage.alt = `غلاف ${currentReview.title || ''} - ReviewQeem`;
+              reviewImage.title = `${currentReview.title || ''} - ReviewQeem - مراجعة ألعاب`;
           } else {
               reviewImage.src = "/uploads/images/default/default-game.jpg";
-              reviewImage.alt = 'صورة افتراضية';
+              reviewImage.alt = 'صورة افتراضية - ReviewQeem';
+              reviewImage.title = 'ReviewQeem - مراجعة ألعاب';
           }
       } else {
           console.error('عنصر صورة الغلاف review-image غير موجود في الصفحة');
@@ -2325,7 +2351,27 @@
       if (currentReview.content && currentReview.content.trim()) {
           // المحتوى القادم من لوحة التحكم محفوظ كـ HTML (وسوم <p> وغيرها)
           // نعرضه كما هو ليظهر منسقاً واحترافياً
-          contentContainer.innerHTML = currentReview.content;
+          let content = currentReview.content;
+          
+          // إضافة alt و title لجميع الصور في المحتوى
+          content = content.replace(/<img([^>]*)>/gi, (match, attributes) => {
+              // التحقق من وجود alt
+              if (!attributes.includes('alt=')) {
+                  attributes += ` alt="${currentReview.title || 'صورة'} - ReviewQeem"`;
+              } else {
+                  // تحديث alt الموجود
+                  attributes = attributes.replace(/alt="([^"]*)"/i, `alt="$1 - ReviewQeem"`);
+              }
+              
+              // التحقق من وجود title
+              if (!attributes.includes('title=')) {
+                  attributes += ` title="${currentReview.title || 'ReviewQeem'} - مراجعة ألعاب"`;
+              }
+              
+              return `<img${attributes}>`;
+          });
+          
+          contentContainer.innerHTML = content;
       } else {
           contentContainer.innerHTML =
               '<p style="text-align: center; color: var(--text-secondary); font-style: italic;">لا يوجد محتوى مفصل متوفر</p>';
@@ -2345,7 +2391,8 @@
               item.className = 'screenshot-item';
               item.innerHTML = `
                   <img src="${screenshot}" 
-                       alt="لقطة شاشة ${index + 1} لـ ${currentReview.title}"
+                       alt="لقطة شاشة ${index + 1} لـ ${currentReview.title} - ReviewQeem"
+                       title="${currentReview.title || 'ReviewQeem'} - مراجعة ألعاب"
                        loading="lazy"
                        onerror="this.src='/uploads/images/default/default-game.jpg'">
               `;

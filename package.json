@@ -34,7 +34,8 @@
     "jsdom": "^27.4.0",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.0.3",
-    "multer": "^2.0.2"
+    "multer": "^2.0.2",
+    "sharp": "^0.33.5"
   },
   "devDependencies": {
     "nodemon": "^3.0.2"
