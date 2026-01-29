@@ -7,13 +7,11 @@ const path = require('path');
 const fs = require('fs');
 require('dotenv').config();
 
+// تعريف isDevelopment في أول سطر بعد الـ requires - مهم جداً لـ Vercel
+const isDevelopment = process.env.NODE_ENV !== 'production';
+
 const app = express();
 const PORT = process.env.PORT || 8093;
-
-// تحديد بيئة التشغيل - تأكد من أن NODE_ENV معرّف
-// في Vercel، NODE_ENV قد يكون غير معرّف، لذا نستخدم قيمة افتراضية
-const NODE_ENV = process.env.NODE_ENV || 'production';
-const isDevelopment = NODE_ENV !== 'production';
 
 // ==================== CORS Configuration ====================
 // إعداد CORS آمن - يسمح فقط بالنطاقات المصرح بها
@@ -23,13 +21,10 @@ const allowedOrigins = process.env.ALLOWED_ORIGINS
 
 app.use(cors({
   origin: function (origin, callback) {
-    // استخدام process.env.NODE_ENV مباشرة لتجنب مشاكل الـ scope
-    const isDev = (process.env.NODE_ENV || 'production') !== 'production';
-    
     // في حالة عدم وجود origin (مثل Postman أو mobile apps)
     if (!origin) {
       // في التطوير المحلي فقط
-      if (isDev) {
+      if (isDevelopment) {
         return callback(null, true);
       }
       return callback(new Error('Not allowed by CORS - No origin'));
@@ -38,7 +33,7 @@ app.use(cors({
     // التحقق من النطاقات المسموحة
     if (allowedOrigins.includes(origin)) {
       callback(null, true);
-    } else if (isDev && (origin.startsWith('http://localhost:') || origin.startsWith('http://127.0.0.1:'))) {
+    } else if (isDevelopment && (origin.startsWith('http://localhost:') || origin.startsWith('http://127.0.0.1:'))) {
       // في التطوير، نسمح بـ localhost
       callback(null, true);
     } else {
@@ -54,8 +49,7 @@ app.use(cors({
 
 // ==================== HTTPS Enforcement ====================
 // إجبار HTTPS في الإنتاج
-// استخدام process.env.NODE_ENV مباشرة لتجنب مشاكل الـ scope
-if ((process.env.NODE_ENV || 'production') === 'production') {
+if (!isDevelopment) {
   app.use((req, res, next) => {
     if (req.header('x-forwarded-proto') !== 'https') {
       res.redirect(`https://${req.header('host')}${req.url}`);
@@ -71,7 +65,7 @@ app.use(
   helmet({
     crossOriginResourcePolicy: { policy: "cross-origin" },
     crossOriginEmbedderPolicy: false,
-    contentSecurityPolicy: ((process.env.NODE_ENV || 'production') !== 'production') ? false : {
+    contentSecurityPolicy: isDevelopment ? false : {
       directives: {
         defaultSrc: ["'self'"],
         scriptSrc: ["'self'", "'unsafe-inline'", "https://cdn.quilljs.com"],
@@ -81,7 +75,7 @@ app.use(
         connectSrc: ["'self'"],
         frameSrc: ["'none'"],
         objectSrc: ["'none'"],
-        upgradeInsecureRequests: ((process.env.NODE_ENV || 'production') !== 'production') ? [] : []
+        upgradeInsecureRequests: isDevelopment ? [] : []
       }
     },
     hidePoweredBy: true, // إخفاء X-Powered-By header
@@ -105,7 +99,7 @@ app.use('/api/*', (req, res, next) => {
   }
   
   // في التطوير، نعطل CSRF لتسهيل الاختبار
-  if ((process.env.NODE_ENV || 'production') !== 'production') {
+  if (isDevelopment) {
     return next();
   }
   
@@ -331,7 +325,7 @@ app.use((err, req, res, next) => {
   res.status(err.status || 500).json({
     success: false,
     message: err.message || 'خطأ داخلي في السيرفر',
-    error: ((process.env.NODE_ENV || 'production') !== 'production') ? err.stack : undefined // إخفاء تفاصيل الخطأ في الإنتاج
+    error: isDevelopment ? err.stack : undefined // إخفاء تفاصيل الخطأ في الإنتاج
   });
 });
 
