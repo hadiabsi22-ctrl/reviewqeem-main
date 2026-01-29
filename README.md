@@ -1,120 +1,155 @@
 # ReviewQeem - منصة مراجعات الألعاب العربية
 
-منصة عربية احترافية لمراجعات الألعاب الإلكترونية.
+منصة حديثة ومتجاوبة بالكامل مخصصة لمراجعات ألعاب الفيديو عالية الجودة والتقييمات والتعليقات.
 
-## 🚀 البدء السريع
+## ✨ المميزات
 
-### 1. تثبيت التبعيات
-```bash
-npm install
-```
+- 🎮 مراجعات شاملة للألعاب
+- ⭐ نظام تقييم متقدم
+- 💬 نظام تعليقات تفاعلي
+- 🔐 لوحة تحكم إدارية آمنة
+- 📱 تصميم متجاوب بالكامل
+- 🔒 أمان عالي المستوى
+- 📊 إحصائيات مفصلة
+- 🎨 واجهة مستخدم عصرية
 
-### 2. إعداد ملف .env
-أنشئ ملف `.env` في المجلد الرئيسي:
-```env
-PORT=8093
-JWT_SECRET=your-secret-key-here
-ENCRYPTION_KEY=your-encryption-key-here
-ADMIN_EMAIL=admin@reviewqeem.com
-ADMIN_PASSWORD=your-strong-password-here
-SUPABASE_URL=your-supabase-url
-SUPABASE_KEY=your-supabase-key
-SUPABASE_BUCKET=game_reviews
-```
+## 🚀 النشر السريع
 
-### 3. تشغيل السيرفر
-```bash
-node server.js
-```
+### على Vercel (موصى به)
 
-أو استخدم:
-```bash
-START_SERVER.bat
-```
+1. **ارفع المشروع إلى GitHub**
+   ```bash
+   git push origin main
+   ```
 
-## 📡 الروابط
+2. **اذهب إلى [vercel.com](https://vercel.com)**
+   - سجل دخول بحساب GitHub
+   - اضغط "Add New Project"
+   - اختر المستودع
 
-بعد تشغيل السيرفر، افتح المتصفح على:
+3. **أضف Environment Variables:**
+   ```
+   NODE_ENV=production
+   JWT_SECRET=your-secret-key
+   ADMIN_EMAIL=admin@reviewqeem.com
+   ADMIN_PASSWORD=your-password
+   ENCRYPTION_KEY=your-encryption-key
+   ALLOWED_ORIGINS=https://your-domain.vercel.app
+   ```
 
-- **الصفحة الرئيسية**: http://127.0.0.1:8093/
-- **قائمة المراجعات**: http://127.0.0.1:8093/reviews-list.html
-- **لوحة التحكم**: http://127.0.0.1:8093/admin.html
-- **تسجيل الدخول**: http://127.0.0.1:8093/admin-login.html
-- **API Health Check**: http://127.0.0.1:8093/api/health
+4. **اضغط Deploy**
 
-## 🔐 بيانات الدخول الافتراضية
+📖 **دليل مفصل:** راجع [DEPLOY_VERCEL_GUIDE.md](./DEPLOY_VERCEL_GUIDE.md)
 
-- **البريد الإلكتروني**: admin@reviewqeem.com
-- **كلمة المرور**: (راجع ملف .env أو CREDENTIALS.txt)
+## 🛠️ التثبيت المحلي
+
+### المتطلبات
+
+- Node.js 16+ 
+- npm أو yarn
+
+### الخطوات
+
+1. **استنساخ المشروع**
+   ```bash
+   git clone https://github.com/hadiabsi22-ctrl/reviewqeem.git
+   cd reviewqeem
+   ```
+
+2. **تثبيت المكتبات**
+   ```bash
+   npm install
+   ```
+
+3. **إعداد Environment Variables**
+   
+   أنشئ ملف `.env`:
+   ```env
+   PORT=8093
+   NODE_ENV=development
+   JWT_SECRET=your-secret-key
+   ADMIN_EMAIL=admin@reviewqeem.com
+   ADMIN_PASSWORD=your-password
+   ENCRYPTION_KEY=your-encryption-key
+   ALLOWED_ORIGINS=http://localhost:8093
+   ```
+
+4. **تشغيل السيرفر**
+   ```bash
+   npm start
+   # أو للتطوير
+   npm run dev
+   ```
+
+5. **افتح المتصفح**
+   ```
+   http://localhost:8093
+   ```
 
 ## 📁 هيكل المشروع
 
 ```
-reviewqeem-main/
+reviewqeem/
 ├── server.js              # السيرفر الرئيسي
-├── package.json           # التبعيات
-├── .env                   # الإعدادات (غير موجود في Git)
-├── routes/                 # API Routes
-│   ├── adminAuth.js
-│   ├── reviews.js
-│   ├── comments.js
-│   └── ...
-├── models/                 # نماذج البيانات
-│   ├── AdminLocal.js
-│   ├── ReviewLocal.js
-│   └── ...
-├── middleware/             # Middleware
-│   └── auth.js
-├── storage/                # نظام التخزين
-│   └── localStorage.js
-├── css/                    # ملفات CSS
-├── js/                     # ملفات JavaScript
-└── images/                 # الصور
+├── routes/                # API routes
+├── models/                # نماذج البيانات
+├── middleware/            # Middleware (Auth, etc.)
+├── utils/                 # Utilities (Sanitize, Logger, etc.)
+├── storage/               # نظام التخزين المحلي
+├── css/                   # ملفات CSS
+├── js/                    # ملفات JavaScript
+├── uploads/               # الملفات المرفوعة
+└── data/                  # البيانات المشفرة
 ```
-
-## 🛠️ الميزات
-
-- ✅ نظام مراجعات كامل
-- ✅ لوحة تحكم إدارية
-- ✅ نظام تعليقات
-- ✅ تخزين محلي مشفر
-- ✅ رفع الصور إلى Supabase
-- ✅ API كامل للواجهة الأمامية
-
-## 📝 API Endpoints
-
-### Authentication
-- `POST /api/admin/auth/login` - تسجيل الدخول
-- `GET /api/admin/auth/verify` - التحقق من الجلسة
-- `POST /api/admin/auth/change-password` - تغيير كلمة المرور
-
-### Reviews
-- `GET /api/reviews/published` - جلب المراجعات المنشورة
-- `GET /api/reviews` - جلب جميع المراجعات (admin)
-- `POST /api/reviews` - إنشاء مراجعة جديدة
-- `PUT /api/reviews/:id` - تحديث مراجعة
-- `DELETE /api/reviews/:id` - حذف مراجعة
-
-### Comments
-- `GET /api/comments/:reviewId` - جلب التعليقات
-- `POST /api/comments` - إضافة تعليق
-- `PUT /api/comments/:id/like` - إعجاب بتعليق
-
-### Stats
-- `GET /api/stats` - الإحصائيات العامة
 
 ## 🔒 الأمان
 
-- استخدام JWT للمصادقة
-- تشفير البيانات المحلية
-- Rate Limiting
-- Helmet Security Headers
-- CORS محدث بشكل صحيح
+تم تطبيق إصلاحات أمنية شاملة:
 
-## 📞 الدعم
+- ✅ CORS محدود للنطاقات المصرح بها
+- ✅ تنظيف المدخلات (Input Sanitization)
+- ✅ فحص الملفات (Magic Bytes)
+- ✅ CSRF Protection
+- ✅ Security Logging
+- ✅ Rate Limiting
+- ✅ HTTPS Enforcement
 
-للمساعدة والدعم، راجع ملف `CLEANUP_REPORT.md` للحصول على تفاصيل إضافية.
+📖 **التفاصيل:** راجع [SECURITY_FIXES_COMPLETE.md](./SECURITY_FIXES_COMPLETE.md)
+
+## 📚 الوثائق
+
+- [دليل النشر على Vercel](./DEPLOY_VERCEL_GUIDE.md)
+- [دليل تفعيل HTTPS](./HTTPS_SETUP_GUIDE.md)
+- [تقرير الأمان](./SECURITY_AUDIT_REPORT.md)
+- [الإصلاحات الأمنية](./SECURITY_FIXES_COMPLETE.md)
+
+## 🛡️ Environment Variables
+
+| Variable | Description | Required |
+|----------|-------------|----------|
+| `PORT` | منفذ السيرفر | ❌ (افتراضي: 8093) |
+| `NODE_ENV` | بيئة التشغيل | ❌ |
+| `JWT_SECRET` | مفتاح JWT | ✅ |
+| `ADMIN_EMAIL` | بريد الأدمن | ✅ |
+| `ADMIN_PASSWORD` | كلمة مرور الأدمن | ✅ |
+| `ENCRYPTION_KEY` | مفتاح التشفير | ✅ |
+| `ALLOWED_ORIGINS` | النطاقات المسموحة | ✅ |
+| `SUPABASE_URL` | رابط Supabase | ⚠️ اختياري |
+| `SUPABASE_KEY` | مفتاح Supabase | ⚠️ اختياري |
+
+## 📝 الرخصة
+
+ISC
+
+## 👤 المؤلف
+
+[hadiabsi22-ctrl](https://github.com/hadiabsi22-ctrl)
+
+## 🔗 الروابط
+
+- **المستودع:** [GitHub](https://github.com/hadiabsi22-ctrl/reviewqeem)
+- **النشر:** [Vercel](https://reviewqeem.vercel.app)
 
 ---
 
-**تم التطوير بحب ❤️ لعشاق الألعاب العرب**
+**ملاحظة:** تأكد من تعيين جميع Environment Variables قبل النشر!
