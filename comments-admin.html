@@ -1041,8 +1041,8 @@
         // ==================== SYSTEM CONFIGURATION ====================
         const CONFIG = {
             API: {
-                // قاعدة السيرفر السحابي - استبدل بالعنوان الحقيقي
-                BASE_URL: "http://127.0.0.1:8093",
+                // API_BASE يعمل تلقائياً مع Vercel والمحلي
+                BASE_URL: (window.location.origin || 'http://127.0.0.1:8093'),
 
                 ENDPOINTS: {
                     LOGIN: '/api/admin/auth/login',

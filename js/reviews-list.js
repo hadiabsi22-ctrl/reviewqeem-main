@@ -5,9 +5,8 @@
 
 console.log("📌 reviews-list.js Loaded");
 
-const API_BASE = window.API_BASE || (window.location.hostname === 'localhost' 
-    ? 'http://localhost:8093' 
-    : window.location.origin);
+// API_BASE يعمل تلقائياً مع Vercel والمحلي
+const API_BASE = window.API_BASE || (window.location.origin || 'http://localhost:8093');
 
 // عناصر الصفحة
 const reviewsContainer = document.getElementById("reviews-list");

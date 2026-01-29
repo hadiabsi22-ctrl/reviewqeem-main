@@ -7,7 +7,9 @@ const ReviewLocal = require('../models/ReviewLocal');
  */
 async function generateSitemap() {
   try {
-    const baseUrl = process.env.SITE_URL || 'http://127.0.0.1:8093';
+    // استخدام SITE_URL من environment variables أو VERCEL_URL
+    const baseUrl = process.env.SITE_URL || 
+                    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://127.0.0.1:8093');
     const reviews = await ReviewLocal.find({ 'data.status': 'published' });
     
     let sitemap = `<?xml version="1.0" encoding="UTF-8"?>
