@@ -8,7 +8,11 @@ const fs = require('fs');
 require('dotenv').config();
 
 // تعريف isDevelopment في أول سطر بعد الـ requires - مهم جداً لـ Vercel
-const isDevelopment = process.env.NODE_ENV !== 'production';
+// التأكد من أن NODE_ENV معرّف دائماً
+const NODE_ENV = process.env.NODE_ENV || 'production';
+// في Vercel، isDevelopment يجب أن يكون false دائماً
+// في التطوير المحلي، isDevelopment يكون true إذا NODE_ENV !== 'production'
+const isDevelopment = !process.env.VERCEL && NODE_ENV !== 'production';
 
 const app = express();
 const PORT = process.env.PORT || 8093;
