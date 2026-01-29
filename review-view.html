@@ -1928,8 +1928,8 @@
     <!-- JavaScript -->
     <script>
   // ==================== API BASE ====================
-  // خَلِّه نفس اللي في باقي الصفحات
-  const API_BASE = 'http://127.0.0.1:8093/api';
+  // API_BASE يعمل تلقائياً مع Vercel والمحلي
+  const API_BASE = (window.location.origin || 'http://127.0.0.1:8093') + '/api';
 
   // ==================== GLOBAL VARIABLES ====================
   let currentReview = null;
