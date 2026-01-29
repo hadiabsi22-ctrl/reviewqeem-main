@@ -9,7 +9,10 @@ require('dotenv').config();
 
 const app = express();
 const PORT = process.env.PORT || 8093;
-const isDevelopment = process.env.NODE_ENV !== 'production';
+
+// تحديد بيئة التشغيل - تأكد من أن NODE_ENV معرّف
+const NODE_ENV = process.env.NODE_ENV || 'production';
+const isDevelopment = NODE_ENV !== 'production';
 
 // ==================== CORS Configuration ====================
 // إعداد CORS آمن - يسمح فقط بالنطاقات المصرح بها
