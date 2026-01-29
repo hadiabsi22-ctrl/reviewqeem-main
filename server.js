@@ -12,7 +12,8 @@ require('dotenv').config();
 const NODE_ENV = process.env.NODE_ENV || 'production';
 // في Vercel، isDevelopment يجب أن يكون false دائماً
 // في التطوير المحلي، isDevelopment يكون true إذا NODE_ENV !== 'production'
-const isDevelopment = !process.env.VERCEL && NODE_ENV !== 'production';
+// Fallback إضافي لضمان أن isDevelopment معرّف دائماً
+const isDevelopment = (typeof process.env.VERCEL === 'undefined' || !process.env.VERCEL) && NODE_ENV !== 'production';
 
 const app = express();
 const PORT = process.env.PORT || 8093;
