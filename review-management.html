@@ -1275,7 +1275,8 @@
 
     <script>
         // ==================== إعدادات السيرفر ====================
-        const API_BASE = "http://127.0.0.1:8093/api";
+        // API_BASE يعمل تلقائياً مع Vercel والمحلي
+        const API_BASE = (window.location.origin || 'http://127.0.0.1:8093') + '/api';
         const API_BASE_URL = API_BASE + "/reviews";
         // استخدام API الخاص بنا للرفع إلى Supabase
         const UPLOAD_API_URL = API_BASE + "/upload/single";
