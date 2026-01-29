@@ -3,9 +3,12 @@
    =============================================================== */
 
 // API Base URL
-const API_BASE = window.location.hostname === 'localhost'
-    ? 'http://localhost:8093/api'
-    : (window.location.origin + '/api');
+const getApiBaseUrl = () => {
+    const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    return isLocal ? 'http://127.0.0.1:8093/api' : '/api';
+};
+
+const API_BASE = getApiBaseUrl();
 
 /* ===============================================================
    نظام المصادقة

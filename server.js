@@ -25,12 +25,17 @@ const allowedOrigins = process.env.ALLOWED_ORIGINS
 
 app.use(cors({
   origin: function (origin, callback) {
+    // السماح بطلبات بدون origin (مثل Postman أو mobile apps)
     if (!origin) {
-      if (isDevelopment) return callback(null, true);
-      return callback(null, true); // السماح بطلبات السيرفر في الإنتاج لتجنب الانهيار
+      callback(null, true);
+      return;
     }
     
-    if (allowedOrigins.includes(origin) || isDevelopment) {
+    // السماح بالنطاقات المسموحة
+    if (allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else if (isDevelopment && (origin.startsWith('http://localhost:') || origin.startsWith('http://127.0.0.1:'))) {
+      // في التطوير، نسمح بـ localhost
       callback(null, true);
     } else {
       console.warn(`⚠️ CORS blocked request from: ${origin}`);

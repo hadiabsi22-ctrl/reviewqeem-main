@@ -1276,7 +1276,12 @@
     <script>
         // ==================== إعدادات السيرفر ====================
         // API_BASE يعمل تلقائياً مع Vercel والمحلي
-        const API_BASE = (window.location.origin || 'http://127.0.0.1:8093') + '/api';
+        const getApiBaseUrl = () => {
+            const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+            return isLocal ? 'http://127.0.0.1:8093/api' : '/api';
+        };
+        
+        const API_BASE = getApiBaseUrl();
         const API_BASE_URL = API_BASE + "/reviews";
         // استخدام API الخاص بنا للرفع إلى Supabase
         const UPLOAD_API_URL = API_BASE + "/upload/single";
@@ -1381,7 +1386,7 @@
                                              class="editor-block-image" 
                                              alt=""
                                              style="max-width: 100%; height: auto; border-radius: 8px; border: 2px solid var(--border-color);"
-                                             onerror="this.onerror=null; this.src='http://127.0.0.1:8093/uploads/images/default/default-game.jpg';">
+                                             onerror="this.onerror=null; this.src='/uploads/images/default/default-game.jpg';">
                                         <button type="button" 
                                                 onclick="changeBlockImage('${block.id}')" 
                                                 style="position: absolute; top: 5px; right: 5px; background: var(--primary); color: white; border: none; border-radius: 5px; padding: 5px 10px; cursor: pointer; font-size: 0.8rem;">
@@ -1976,12 +1981,12 @@
             }
             
             // إذا كانت URL من Supabase (تبدأ بـ http)، استخدمها مباشرة
-            const fullUrl = url.startsWith('http') ? url : (url.startsWith('/') ? `http://127.0.0.1:8093${url}` : url);
+            const fullUrl = url.startsWith('http') ? url : (url.startsWith('/') ? url : `/${url}`);
             
             container.innerHTML = `
                 <div class="image-preview">
                     <img src="${fullUrl}" 
-                         onerror="this.onerror=null; this.src='http://127.0.0.1:8093/uploads/images/default/default-game.jpg';" 
+                         onerror="this.onerror=null; this.src='/uploads/images/default/default-game.jpg';" 
                          style="max-width: 100%; height: auto; border-radius: 8px;">
                     <button type="button" class="remove-image" onclick="removeCoverImage()">
                         <i class="fas fa-times"></i>
@@ -2003,11 +2008,11 @@
             }
             
             container.innerHTML = screenshotsToShow.map((url, index) => {
-                const fullUrl = url && url.startsWith('http') ? url : (url ? `http://127.0.0.1:8093${url}` : 'http://127.0.0.1:8093/uploads/images/default/default-game.jpg');
+                const fullUrl = url && url.startsWith('http') ? url : (url ? (url.startsWith('/') ? url : `/${url}`) : '/uploads/images/default/default-game.jpg');
                 return `
                     <div class="image-preview">
                         <img src="${fullUrl}" 
-                             onerror="this.onerror=null; this.src='http://127.0.0.1:8093/uploads/images/default/default-game.jpg';" 
+                             onerror="this.onerror=null; this.src='/uploads/images/default/default-game.jpg';" 
                              style="max-width: 100%; height: auto; border-radius: 8px;">
                         <button type="button" class="remove-image" onclick="removeScreenshot(${index})">
                             <i class="fas fa-times"></i>
@@ -2199,7 +2204,7 @@
         function createReviewRow(r) {
             // البحث عن الصورة في عدة حقول محتملة
             const img = r.cover_image || r.coverImage || r.mainImage || getDefaultImage(r.title, r.genre);
-            const fullImgUrl = img && img.startsWith('http') ? img : (img ? `http://127.0.0.1:8093${img}` : '/uploads/images/default/default-game.jpg');
+            const fullImgUrl = img && img.startsWith('http') ? img : (img ? (img.startsWith('/') ? img : `/${img}`) : '/uploads/images/default/default-game.jpg');
             const statusClass = r.status === 'published' ? 'status-published' : 'status-draft';
             const statusText = r.status === 'published' ? 'منشور' : 'مسودة';
             const statusIcon = r.status === 'published' ? 'fa-check-circle' : 'fa-edit';

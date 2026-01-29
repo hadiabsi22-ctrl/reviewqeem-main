@@ -1,5 +1,10 @@
 // frontend/js/review-editor.js
-const API = window.API_BASE || "http://localhost:8093/api";
+const getApiBaseUrl = () => {
+    const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    return isLocal ? 'http://127.0.0.1:8093/api' : '/api';
+};
+
+const API = window.API_BASE || getApiBaseUrl();
 
 /* ======================================================
    1) TinyMCE + رفع الصور إلى Firebase
