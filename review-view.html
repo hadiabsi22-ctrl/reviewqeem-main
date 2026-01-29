@@ -536,33 +536,39 @@
             color: var(--text-secondary);
         }
 
-        .review-body img {
-            max-width: 100%;
-            height: auto;
-            border-radius: var(--radius-md);
-            display: block;
-            margin: 20px auto;
-        }
-
-        /* Inline Images from Rich Text Editor - تصغير حجم الصور */
+        /* ========== تنسيق الصور في محتوى المراجعة - متجاوب ========== */
+        .review-body img,
         .review-body img.content-img,
-        .review-body .content-img {
-            max-width: 400px;
-            width: auto;
+        .review-body .content-img,
+        .inline-review-img {
+            width: 100%;
+            max-width: 800px;
             height: auto;
+            aspect-ratio: 16 / 9;
+            object-fit: cover;
             border-radius: 12px;
-            margin: 20px auto;
             display: block;
+            margin: 20px auto;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
         }
 
-        /* تنسيق الصور البينية داخل النص */
-        .inline-review-img {
-            max-width: 100%;
-            height: auto;
-            display: block;
+        /* حاوية الصور - للتنسيق الإضافي */
+        .image-container {
+            width: 100%;
+            max-width: 800px;
             margin: 20px auto;
-            border-radius: 8px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        .image-container img {
+            width: 100%;
+            max-width: 800px;
+            height: auto;
+            aspect-ratio: 16 / 9;
+            object-fit: cover;
+            border-radius: 12px;
+            display: block;
+            margin: 0 auto;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
         }
 
         .review-body p {
@@ -1522,6 +1528,23 @@
             
             .btn-share {
                 width: 100%;
+            }
+
+            /* تنسيق الصور للشاشات الصغيرة */
+            .review-body img,
+            .review-body img.content-img,
+            .review-body .content-img,
+            .inline-review-img,
+            .image-container img {
+                max-width: 100%;
+                border-radius: 8px;
+                margin: 10px auto;
+                aspect-ratio: auto; /* السماح بالتناسب الطبيعي في الجوال */
+            }
+
+            .image-container {
+                max-width: 100%;
+                margin: 10px auto;
             }
         }
 
