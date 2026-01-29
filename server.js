@@ -333,17 +333,21 @@ app.use((req, res) => {
 });
 
 // ==================== Start Server ====================
-app.listen(PORT, '0.0.0.0', () => {
-  console.log('\n' + '='.repeat(60));
-  console.log(`🚀 السيرفر يعمل على المنفذ ${PORT}`);
-  console.log('='.repeat(60));
-  console.log(`📡 API: http://127.0.0.1:${PORT}/api`);
-  console.log(`🔗 Health: http://127.0.0.1:${PORT}/api/health`);
-  console.log(`🌐 الموقع: http://127.0.0.1:${PORT}`);
-  console.log(`📄 الرئيسية: http://127.0.0.1:${PORT}/index.html`);
-  console.log(`📄 المراجعات: http://127.0.0.1:${PORT}/reviews-list.html`);
-  console.log(`📄 لوحة التحكم: http://127.0.0.1:${PORT}/admin.html`);
-  console.log('='.repeat(60) + '\n');
-});
+// في Vercel، لا نبدأ السيرفر مباشرة - يتم استدعاء app من api/index.js
+// في التطوير المحلي، نبدأ السيرفر
+if (process.env.NODE_ENV !== 'production' || !process.env.VERCEL) {
+  app.listen(PORT, '0.0.0.0', () => {
+    console.log('\n' + '='.repeat(60));
+    console.log(`🚀 السيرفر يعمل على المنفذ ${PORT}`);
+    console.log('='.repeat(60));
+    console.log(`📡 API: http://127.0.0.1:${PORT}/api`);
+    console.log(`🔗 Health: http://127.0.0.1:${PORT}/api/health`);
+    console.log(`🌐 الموقع: http://127.0.0.1:${PORT}`);
+    console.log(`📄 الرئيسية: http://127.0.0.1:${PORT}/index.html`);
+    console.log(`📄 المراجعات: http://127.0.0.1:${PORT}/reviews-list.html`);
+    console.log(`📄 لوحة التحكم: http://127.0.0.1:${PORT}/admin.html`);
+    console.log('='.repeat(60) + '\n');
+  });
+}
 
 module.exports = app;
