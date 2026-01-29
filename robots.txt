@@ -1,0 +1,28 @@
+# robots.txt for ReviewQeem
+# Allow search engines to index public pages
+
+User-agent: *
+Allow: /
+Allow: /index.html
+Allow: /reviews-list.html
+Allow: /review-view.html
+Allow: /about.html
+Allow: /contact.html
+Allow: /faq.html
+Allow: /uploads/
+
+# Disallow admin and system files
+Disallow: /admin.html
+Disallow: /admin-login.html
+Disallow: /review-management.html
+Disallow: /comments-admin.html
+Disallow: /stats.html
+Disallow: /settings.html
+Disallow: /api/
+Disallow: /data/
+Disallow: /node_modules/
+Disallow: /*.js$
+Disallow: /*.json$
+
+# Sitemap location
+Sitemap: http://127.0.0.1:8093/sitemap.xml
