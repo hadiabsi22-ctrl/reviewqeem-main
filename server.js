@@ -7,12 +7,17 @@ const path = require('path');
 const fs = require('fs');
 require('dotenv').config();
 
-// ==================== التعديل الجذري للإصلاح ====================
-// تعريف NODE_ENV بشكل صارم
+// ==================== تعريف isDevelopment في أول سطر بعد الـ requires ====================
+// هذا مهم جداً لـ Vercel - يجب أن يكون في أعلى الملف مباشرة
+// التأكد من أن NODE_ENV معرّف دائماً
 const NODE_ENV = process.env.NODE_ENV || 'production';
+// تعريف isDevelopment بشكل صارم وآمن
+const isDevelopment = (NODE_ENV !== 'production' && NODE_ENV !== 'PRODUCTION');
 
-// تعريف isDevelopment بشكل بسيط يمنع ظهور ReferenceError
-const isDevelopment = NODE_ENV !== 'production';
+// تأكد من أن isDevelopment معرّف دائماً (fallback إضافي)
+if (typeof isDevelopment === 'undefined') {
+  throw new Error('FATAL: isDevelopment is undefined - NODE_ENV: ' + NODE_ENV);
+}
 // ==========================================================
 
 const app = express();
