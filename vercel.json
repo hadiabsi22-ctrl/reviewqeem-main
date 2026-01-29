@@ -6,8 +6,19 @@
       "dest": "/api/index.js"
     },
     {
+      "src": "/uploads/(.*)",
+      "dest": "/uploads/$1",
+      "headers": {
+        "Cache-Control": "public, max-age=31536000, immutable"
+      }
+    },
+    {
       "src": "/(.*\\.(html|css|js|png|jpg|jpeg|gif|svg|ico|webp|woff|woff2|ttf|eot))",
       "dest": "/$1"
+    },
+    {
+      "src": "/review/(.*)",
+      "dest": "/review-view.html"
     },
     {
       "src": "/(.*)",
@@ -16,7 +27,14 @@
   ],
   "functions": {
     "api/index.js": {
-      "maxDuration": 30
+      "maxDuration": 30,
+      "memory": 1024
     }
-  }
+  },
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "/api/index.js"
+    }
+  ]
 }
