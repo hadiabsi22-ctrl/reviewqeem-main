@@ -2,50 +2,63 @@ const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
+const cookieParser = require('cookie-parser');
 const path = require('path');
 const fs = require('fs');
 require('dotenv').config();
 
 const app = express();
 const PORT = process.env.PORT || 8093;
+const isDevelopment = process.env.NODE_ENV !== 'production';
 
 // ==================== CORS Configuration ====================
-app.options('*', cors());
+// إعداد CORS آمن - يسمح فقط بالنطاقات المصرح بها
+const allowedOrigins = process.env.ALLOWED_ORIGINS 
+  ? process.env.ALLOWED_ORIGINS.split(',').map(origin => origin.trim())
+  : ['http://localhost:8093', 'http://127.0.0.1:8093'];
+
 app.use(cors({
   origin: function (origin, callback) {
-    if (!origin || 
-        origin.startsWith('http://localhost:') || 
-        origin.startsWith('http://127.0.0.1:') ||
-        origin.startsWith('file://')) {
-      return callback(null, true);
+    // في حالة عدم وجود origin (مثل Postman أو mobile apps)
+    if (!origin) {
+      // في التطوير المحلي فقط
+      if (isDevelopment) {
+        return callback(null, true);
+      }
+      return callback(new Error('Not allowed by CORS - No origin'));
     }
-    callback(null, true);
+    
+    // التحقق من النطاقات المسموحة
+    if (allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else if (isDevelopment && (origin.startsWith('http://localhost:') || origin.startsWith('http://127.0.0.1:'))) {
+      // في التطوير، نسمح بـ localhost
+      callback(null, true);
+    } else {
+      console.warn(`⚠️  CORS blocked request from: ${origin}`);
+      callback(new Error('Not allowed by CORS'));
+    }
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin']
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
+  maxAge: 86400 // 24 hours
 }));
 
-// إضافة headers يدوياً
-app.use((req, res, next) => {
-  const origin = req.headers.origin;
-  if (!origin || origin.startsWith('http://localhost:') || origin.startsWith('http://127.0.0.1:')) {
-    res.header('Access-Control-Allow-Origin', origin || '*');
-  } else {
-    res.header('Access-Control-Allow-Origin', '*');
-  }
-  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin');
-  res.header('Access-Control-Allow-Credentials', 'true');
-  if (req.method === 'OPTIONS') {
-    return res.sendStatus(204);
-  }
-  next();
-});
+// ==================== HTTPS Enforcement ====================
+// إجبار HTTPS في الإنتاج
+if (!isDevelopment) {
+  app.use((req, res, next) => {
+    if (req.header('x-forwarded-proto') !== 'https') {
+      res.redirect(`https://${req.header('host')}${req.url}`);
+    } else {
+      next();
+    }
+  });
+}
 
 // ==================== Helmet Configuration ====================
 // تفعيل CSP بشكل صحيح للأمان
-
 app.use(
   helmet({
     crossOriginResourcePolicy: { policy: "cross-origin" },
