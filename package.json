@@ -11,7 +11,7 @@
     "type-check": "tsc --noEmit"
   },
   "engines": {
-    "node": ">=20.0.0"
+    "node": "20.x"
   },
   "dependencies": {
     "@floating-ui/dom": "^1.7.5",
