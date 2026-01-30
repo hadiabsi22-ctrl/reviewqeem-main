@@ -66,9 +66,11 @@ async function handler(req: NextRequest, admin: any) {
 
     // Update password
     const adminData = currentAdmin.toObject();
-    adminData.password = newPassword; // Will be hashed in save()
-
-    const updatedAdmin = new AdminLocal(adminData);
+    // Create new admin with password (password will be hashed in save())
+    const updatedAdmin = new AdminLocal({
+      ...adminData,
+      password: newPassword, // Will be hashed in save()
+    } as any);
     await updatedAdmin.save();
 
     return NextResponse.json({

@@ -38,17 +38,30 @@ async function handler(
       );
     }
 
-    // Update comment content
-    Object.assign(comment.data, { 
-      content: sanitizeHTML(content),
-      updatedAt: new Date().toISOString()
-    });
-    await comment.save();
+    // Update comment content using findByIdAndUpdate
+    const updatedComment = await CommentLocal.findByIdAndUpdate(
+      id,
+      { 
+        content: sanitizeHTML(content),
+        updatedAt: new Date().toISOString()
+      },
+      { new: true }
+    );
+
+    if (!updatedComment) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: 'فشل تحديث التعليق',
+        } as ApiResponse,
+        { status: 500 }
+      );
+    }
 
     return NextResponse.json({
       success: true,
       message: 'تم تحديث التعليق بنجاح',
-      data: comment.toObject(),
+      data: updatedComment.toObject(),
     } as ApiResponse);
   } catch (error: any) {
     console.error('Error editing comment:', error);

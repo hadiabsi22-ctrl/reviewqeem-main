@@ -24,14 +24,27 @@ async function handler(
       );
     }
 
-    // Update status
-    Object.assign(comment.data, { status: 'approved' });
-    await comment.save();
+    // Update status using findByIdAndUpdate
+    const updatedComment = await CommentLocal.findByIdAndUpdate(
+      id,
+      { status: 'approved' },
+      { new: true }
+    );
+
+    if (!updatedComment) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: 'فشل تحديث التعليق',
+        } as ApiResponse,
+        { status: 500 }
+      );
+    }
 
     return NextResponse.json({
       success: true,
       message: 'تمت الموافقة على التعليق',
-      data: comment.toObject(),
+      data: updatedComment.toObject(),
     } as ApiResponse);
   } catch (error: any) {
     console.error('Error approving comment:', error);

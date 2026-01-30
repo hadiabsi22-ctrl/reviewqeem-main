@@ -50,13 +50,15 @@ async function handler(req: NextRequest, admin: any) {
       id: '',
       title: sanitizeText(body.title),
       slug: sanitizeText(body.slug).toLowerCase().replace(/[^a-z0-9-]/g, '-'),
+      gameTitle: sanitizeText(body.title), // Use title as gameTitle
+      gameSlug: sanitizeText(body.slug).toLowerCase().replace(/[^a-z0-9-]/g, '-'), // Use slug as gameSlug
       summary: sanitizeText(body.summary),
       content: sanitizeHTML(body.content),
       rating: Math.max(0, Math.min(10, parseFloat(body.rating) || 0)),
       tags: Array.isArray(body.genre) ? body.genre : [],
       category: Array.isArray(body.genre) && body.genre.length > 0 ? body.genre[0] : '',
-      pros: Array.isArray(body.pros) ? body.pros.filter(p => p.trim()) : [],
-      cons: Array.isArray(body.cons) ? body.cons.filter(c => c.trim()) : [],
+      pros: Array.isArray(body.pros) ? body.pros.filter((p: string) => p.trim()) : [],
+      cons: Array.isArray(body.cons) ? body.cons.filter((c: string) => c.trim()) : [],
       status: body.status || 'draft',
       featured: body.featured === true,
       coverImage: body.coverImage || '',

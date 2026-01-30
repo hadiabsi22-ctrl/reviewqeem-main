@@ -43,15 +43,18 @@ export class AdminLocal {
     }
 
     if (isNew) {
-      return storage.insert(this.data);
+      return await Promise.resolve(storage.insert(this.data));
     } else {
       const id = this.data._id || this.data.id;
-      return storage.update({ _id: id }, this.data);
+      return await Promise.resolve(storage.update({ _id: id }, this.data));
     }
   }
 
   async comparePassword(password: string): Promise<boolean> {
-    return bcrypt.compare(password, this.data.password);
+    if (!this.data.password) {
+      return false;
+    }
+    return await bcrypt.compare(password, this.data.password);
   }
 
   static async find(query: Partial<Admin> = {}): Promise<AdminLocal[]> {

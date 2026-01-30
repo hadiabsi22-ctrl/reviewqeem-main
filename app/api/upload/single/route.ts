@@ -56,10 +56,10 @@ async function handler(req: NextRequest, admin: any) {
 
     // Convert File to Buffer
     const arrayBuffer = await file.arrayBuffer();
-    const buffer = Buffer.from(arrayBuffer);
+    const buffer = Buffer.from(arrayBuffer as ArrayBuffer);
 
     // Process image with sharp (resize, optimize)
-    let processedBuffer = buffer;
+    let processedBuffer: Buffer = buffer;
     try {
       const image = sharp(buffer);
       const metadata = await image.metadata();
@@ -69,12 +69,12 @@ async function handler(req: NextRequest, admin: any) {
         processedBuffer = await image
           .resize(1920, null, { withoutEnlargement: true })
           .jpeg({ quality: 85 })
-          .toBuffer();
+          .toBuffer() as Buffer;
       } else {
         // Just optimize
         processedBuffer = await image
           .jpeg({ quality: 85 })
-          .toBuffer();
+          .toBuffer() as Buffer;
       }
     } catch (error) {
       console.warn('Image processing failed, using original:', error);
