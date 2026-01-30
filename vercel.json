@@ -11,5 +11,6 @@
     "app/**/*.tsx": {
       "runtime": "nodejs20.x"
     }
-  }
+  },
+  "regions": ["iad1"]
 }
