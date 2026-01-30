@@ -1,0 +1,310 @@
+.container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, var(--darker-bg) 0%, var(--dark-bg) 100%);
+}
+
+.header {
+  background: var(--card-bg);
+  border-bottom: 1px solid var(--border-color);
+  padding: 25px 0;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.headerContent {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 30px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 30px;
+}
+
+.headerLeft h1 {
+  font-size: 2.2rem;
+  color: var(--text-primary);
+  margin: 0 0 5px 0;
+  font-weight: 800;
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.welcomeText {
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  margin: 0;
+}
+
+.headerRight {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.userInfo {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 10px 20px;
+  background: var(--darker-bg);
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+}
+
+.userAvatar {
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 700;
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+
+.userDetails {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.userEmail {
+  color: var(--text-primary);
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.userRole {
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+}
+
+.logoutBtn {
+  background: linear-gradient(135deg, #e74c3c, #c0392b);
+  color: white;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.95rem;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3);
+}
+
+.logoutBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(231, 76, 60, 0.4);
+}
+
+.logoutIcon {
+  font-size: 1.1rem;
+}
+
+.main {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 50px 30px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 30px;
+}
+
+.card {
+  background: var(--card-bg);
+  padding: 35px;
+  border-radius: var(--radius-lg);
+  border: 2px solid var(--border-color);
+  text-decoration: none;
+  color: inherit;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  min-height: 150px;
+}
+
+.card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 5px;
+  background: linear-gradient(90deg, var(--primary), var(--secondary));
+  transform: scaleX(0);
+  transition: transform 0.4s ease;
+}
+
+.card:hover::before {
+  transform: scaleX(1);
+}
+
+.card:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+  border-color: transparent;
+}
+
+.reviewsCard {
+  background: linear-gradient(135deg, rgba(108, 92, 231, 0.1), rgba(108, 92, 231, 0.05));
+  border-color: rgba(108, 92, 231, 0.3);
+}
+
+.reviewsCard:hover {
+  background: linear-gradient(135deg, rgba(108, 92, 231, 0.2), rgba(108, 92, 231, 0.1));
+  border-color: var(--primary);
+}
+
+.commentsCard {
+  background: linear-gradient(135deg, rgba(0, 184, 148, 0.1), rgba(0, 184, 148, 0.05));
+  border-color: rgba(0, 184, 148, 0.3);
+}
+
+.commentsCard:hover {
+  background: linear-gradient(135deg, rgba(0, 184, 148, 0.2), rgba(0, 184, 148, 0.1));
+  border-color: var(--secondary);
+}
+
+.statsCard {
+  background: linear-gradient(135deg, rgba(253, 203, 110, 0.1), rgba(253, 203, 110, 0.05));
+  border-color: rgba(253, 203, 110, 0.3);
+}
+
+.statsCard:hover {
+  background: linear-gradient(135deg, rgba(253, 203, 110, 0.2), rgba(253, 203, 110, 0.1));
+  border-color: var(--warning);
+}
+
+.settingsCard {
+  background: linear-gradient(135deg, rgba(149, 165, 166, 0.1), rgba(149, 165, 166, 0.05));
+  border-color: rgba(149, 165, 166, 0.3);
+}
+
+.settingsCard:hover {
+  background: linear-gradient(135deg, rgba(149, 165, 166, 0.2), rgba(149, 165, 166, 0.1));
+  border-color: var(--text-secondary);
+}
+
+.cardIcon {
+  font-size: 3.5rem;
+  flex-shrink: 0;
+  transition: transform 0.4s ease;
+}
+
+.card:hover .cardIcon {
+  transform: scale(1.2) rotate(5deg);
+}
+
+.cardContent {
+  flex: 1;
+}
+
+.cardContent h2 {
+  font-size: 1.8rem;
+  margin: 0 0 8px 0;
+  color: var(--text-primary);
+  font-weight: 700;
+}
+
+.cardContent p {
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin: 0;
+  font-size: 1rem;
+}
+
+.cardArrow {
+  font-size: 2rem;
+  color: var(--text-secondary);
+  transition: all 0.4s ease;
+  flex-shrink: 0;
+}
+
+.card:hover .cardArrow {
+  transform: translateX(-10px);
+  color: var(--primary);
+}
+
+.loading {
+  text-align: center;
+  padding: 100px 20px;
+  color: var(--text-secondary);
+  font-size: 1.2rem;
+}
+
+@media (max-width: 1024px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .headerContent {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 20px;
+  }
+
+  .headerRight {
+    width: 100%;
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .userInfo {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .logoutBtn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .main {
+    padding: 30px 20px;
+  }
+
+  .card {
+    padding: 25px;
+    min-height: 120px;
+  }
+
+  .cardIcon {
+    font-size: 2.5rem;
+  }
+
+  .cardContent h2 {
+    font-size: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .headerLeft h1 {
+    font-size: 1.8rem;
+  }
+
+  .card {
+    flex-direction: column;
+    text-align: center;
+    gap: 15px;
+  }
+
+  .cardArrow {
+    display: none;
+  }
+}

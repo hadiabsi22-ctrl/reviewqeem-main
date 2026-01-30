@@ -1,0 +1,242 @@
+.editorWrapper {
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background: var(--bg);
+  overflow: hidden;
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 12px;
+  background: var(--darker-bg);
+  border-bottom: 1px solid var(--border-color);
+  align-items: center;
+}
+
+.toolbarGroup {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+  padding-right: 10px;
+  border-right: 1px solid var(--border-color);
+}
+
+.toolbarGroup:last-child {
+  border-right: none;
+  margin-right: auto;
+}
+
+.toolbarButton {
+  background: transparent;
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s ease;
+  font-weight: 500;
+}
+
+.toolbarButton:hover {
+  background: var(--bg);
+  color: var(--text-primary);
+  border-color: var(--primary);
+}
+
+.toolbarButton.active {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+}
+
+.uploadButton {
+  background: var(--primary);
+  color: white;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s ease;
+  border: none;
+  display: inline-block;
+}
+
+.uploadButton:hover {
+  background: var(--primary-dark);
+}
+
+.imageUrlInput {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+}
+
+.imageUrlInput input {
+  background: var(--bg);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  padding: 6px 10px;
+  border-radius: 4px;
+  font-size: 13px;
+  width: 200px;
+}
+
+.imageUrlInput input:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
+.addImageButton {
+  background: var(--secondary);
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 13px;
+  transition: all 0.2s ease;
+}
+
+.addImageButton:hover {
+  opacity: 0.9;
+}
+
+.editorContainer {
+  min-height: 400px;
+  padding: 20px;
+  background: var(--bg);
+}
+
+.editorContent {
+  min-height: 350px;
+  outline: none;
+  color: var(--text-primary);
+  line-height: 1.8;
+  font-size: 16px;
+}
+
+.editorContent p {
+  margin: 0 0 12px 0;
+}
+
+.editorContent h1 {
+  font-size: 2rem;
+  font-weight: 900;
+  margin: 20px 0 15px 0;
+  color: var(--text-primary);
+}
+
+.editorContent h2 {
+  font-size: 1.75rem;
+  font-weight: 800;
+  margin: 18px 0 12px 0;
+  color: var(--text-primary);
+}
+
+.editorContent h3 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 16px 0 10px 0;
+  color: var(--text-primary);
+}
+
+.editorContent ul,
+.editorContent ol {
+  margin: 12px 0;
+  padding-right: 30px;
+}
+
+.editorContent li {
+  margin: 8px 0;
+}
+
+.editorContent img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  margin: 15px 0;
+  display: block;
+}
+
+.editorContent a {
+  color: var(--primary);
+  text-decoration: underline;
+}
+
+.editorContent a:hover {
+  color: var(--primary-dark);
+}
+
+.editorContent blockquote {
+  border-right: 4px solid var(--primary);
+  padding-right: 15px;
+  margin: 15px 0;
+  font-style: italic;
+  color: var(--text-secondary);
+}
+
+.editorContent code {
+  background: var(--darker-bg);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: 'Courier New', monospace;
+  font-size: 0.9em;
+}
+
+.editorContent pre {
+  background: var(--darker-bg);
+  padding: 15px;
+  border-radius: 8px;
+  overflow-x: auto;
+  margin: 15px 0;
+}
+
+.editorContent pre code {
+  background: none;
+  padding: 0;
+}
+
+/* Placeholder */
+.editorContent p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: right;
+  color: var(--text-secondary);
+  pointer-events: none;
+  height: 0;
+}
+
+@media (max-width: 768px) {
+  .toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .toolbarGroup {
+    border-right: none;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 10px;
+    margin-bottom: 10px;
+  }
+
+  .toolbarGroup:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+  }
+
+  .imageUrlInput {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .imageUrlInput input {
+    width: 100%;
+  }
+
+  .editorContainer {
+    min-height: 300px;
+    padding: 15px;
+  }
+}
