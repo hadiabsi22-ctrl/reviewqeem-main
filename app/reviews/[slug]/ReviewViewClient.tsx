@@ -139,7 +139,7 @@ function fixContentImages(html: string): string {
     return `background-image: url("${fixedUrl}")`;
   });
 
-  // معالجة روابط localhost:8093 أو 127.0.0.1:8093 أو localhost:3001 مباشرة في النص
+  // معالجة روابط localhost أو 127.0.0.1 مباشرة في النص
   const localhostRegex = /(?:http:\/\/)?(?:localhost|127\.0\.0\.1)(?::\d+)?\/uploads\/([^"'\s<>]+)/gi;
   processedHtml = processedHtml.replace(localhostRegex, (match, filePath) => {
     // إذا كان الملف في covers/، استخدم المسار الصحيح
@@ -152,13 +152,13 @@ function fixContentImages(html: string): string {
   // معالجة روابط localhost في src attributes مباشرة (جميع المنافذ)
   const localhostSrcRegex = /src=["'](?:http:\/\/)?(?:localhost|127\.0\.0\.1)(?::\d+)?\/uploads\/([^"']+)["']/gi;
   processedHtml = processedHtml.replace(localhostSrcRegex, (match, filePath) => {
-    // استخدام 3001 بدلاً من 8093
-    const fixedPath = fixImagePath(`http://localhost:3001/uploads/${filePath}`);
+    // استخدام fixImagePath لإصلاح المسار
+    const fixedPath = fixImagePath(`/uploads/${filePath}`);
     return `src="${fixedPath}"`;
   });
 
-  // معالجة روابط localhost:3001 في href attributes
-  const localhostHrefRegex = /href=["'](?:http:\/\/)?(?:localhost|127\.0\.0\.1):3001\/([^"']+)["']/gi;
+  // معالجة روابط localhost في href attributes
+  const localhostHrefRegex = /href=["'](?:http:\/\/)?(?:localhost|127\.0\.0\.1)(?::\d+)?\/([^"']+)["']/gi;
   processedHtml = processedHtml.replace(localhostHrefRegex, (match, path) => {
     return `href="/${path}"`;
   });

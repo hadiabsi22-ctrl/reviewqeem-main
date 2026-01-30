@@ -1,47 +1,34 @@
 // ==================== API Configuration ====================
 
-export const getApiBaseUrl = (): string => {
-  // في Next.js، نستخدم relative paths للـ API routes
-  if (typeof window !== 'undefined') {
-    // Client-side
-    const isLocal = window.location.hostname === 'localhost' || 
-                   window.location.hostname === '127.0.0.1';
-    const port = window.location.port || '3001';
-    return isLocal ? `http://127.0.0.1:${port}/api` : '/api';
-  }
-  // Server-side
-  return process.env.NEXT_PUBLIC_API_URL || '/api';
-};
+// Base URL for API calls
+// Uses environment variable in production, localhost in development
+export const API_BASE_URL = 
+  process.env.NEXT_PUBLIC_API_URL || 
+  process.env.NEXT_PUBLIC_SITE_URL || 
+  (typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3001');
 
-export const API_ENDPOINTS = {
-  REVIEWS: {
-    ALL: '/reviews',
-    PUBLISHED: '/reviews/published',
-    BY_ID: (id: string) => `/reviews/${id}`,
-    BY_SLUG: (slug: string) => `/reviews/slug/${slug}`,
-    CREATE: '/reviews',
-    UPDATE: (id: string) => `/reviews/${id}`,
-    DELETE: (id: string) => `/reviews/${id}`,
-  },
-  COMMENTS: {
-    BY_REVIEW: (reviewId: string) => `/comments/review/${reviewId}`,
-    CREATE: '/comments',
-    LIKE: (id: string) => `/comments/${id}/like`,
-    REPORT: (id: string) => `/comments/${id}/report`,
-  },
-  GAMES: {
-    ALL: '/games',
-    BY_ID: (id: string) => `/games/${id}`,
-    BY_SLUG: (slug: string) => `/games/slug/${slug}`,
-  },
-  ADMIN: {
-    LOGIN: '/admin/auth/login',
-    LOGOUT: '/admin/auth/logout',
-    VERIFY: '/admin/auth/verify',
-  },
-  UPLOAD: {
-    SINGLE: '/upload/single',
-    MULTIPLE: '/upload/multiple',
-  },
-  STATS: '/stats',
-} as const;
+// Full API URL
+export const API_URL = `${API_BASE_URL}/api`;
+
+// Helper function to get full URL for uploads
+export function getUploadUrl(path: string): string {
+  if (!path) return '/images/placeholder.jpg';
+  
+  // If already a full URL, return as is
+  if (path.startsWith('http://') || path.startsWith('https://')) {
+    return path;
+  }
+  
+  // If starts with /api/, return as is
+  if (path.startsWith('/api/')) {
+    return path;
+  }
+  
+  // Otherwise, construct API upload URL
+  if (path.startsWith('uploads/') || path.startsWith('/uploads/')) {
+    const cleanPath = path.replace(/^\/?uploads\//, '');
+    return `/api/uploads/${cleanPath}`;
+  }
+  
+  return `/api/uploads/${path}`;
+}
