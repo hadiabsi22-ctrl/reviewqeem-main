@@ -626,7 +626,12 @@
   }
 
   .coverImageWrapper {
-    height: 350px;
+    max-height: 450px;
+    height: auto;
+  }
+  
+  .coverImage {
+    max-height: 450px;
   }
 
   .title {
