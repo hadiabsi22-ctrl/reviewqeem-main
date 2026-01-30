@@ -12,7 +12,7 @@ export const metadata: Metadata = {
     type: 'website',
     title: 'ReviewQeem - Arabic Game Reviews',
     description: 'اكتشف أحدث مراجعات الألعاب الاحترافية بالعربية على ReviewQeem.',
-    url: 'https://reviewqeem.online',
+    url: process.env.NEXT_PUBLIC_SITE_URL || 'https://reviewqeem.online',
   },
   themeColor: '#6c5ce7',
 };

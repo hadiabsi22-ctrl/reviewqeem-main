@@ -17,7 +17,9 @@ export function middleware(request: NextRequest) {
 
     if (!token) {
       // إعادة توجيه إلى صفحة تسجيل الدخول
-      const loginUrl = new URL('/management-station/login', request.url);
+      // استخدام request.url للحصول على base URL تلقائياً
+      const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || request.url.split('/management-station')[0];
+      const loginUrl = new URL('/management-station/login', baseUrl);
       loginUrl.searchParams.set('redirect', pathname);
       return NextResponse.redirect(loginUrl);
     }
