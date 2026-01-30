@@ -1,16 +1,4 @@
 {
-  "framework": "nextjs",
-  "buildCommand": "npm run build",
-  "devCommand": "npm run dev",
-  "installCommand": "npm install",
-  "outputDirectory": ".next",
-  "crons": [],
-  "functions": {
-    "app/api/**/*.ts": {
-      "runtime": "nodejs20.x"
-    },
-    "app/api/**/*.js": {
-      "runtime": "nodejs20.x"
-    }
-  }
+  "version": 2,
+  "framework": "nextjs"
 }
