@@ -11,6 +11,29 @@ if (!JWT_SECRET) {
   console.error('❌ خطأ أمني: يجب تعيين JWT_SECRET في ملف .env');
 }
 
+// Handle CORS preflight requests
+export async function OPTIONS(request: NextRequest) {
+  return new NextResponse(null, {
+    status: 200,
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+    },
+  });
+}
+
+// Handle unsupported methods
+export async function GET() {
+  return NextResponse.json(
+    {
+      success: false,
+      message: 'Method not allowed. Use POST.',
+    } as ApiResponse,
+    { status: 405 }
+  );
+}
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
