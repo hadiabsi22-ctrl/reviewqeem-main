@@ -4,6 +4,11 @@ import type { NextRequest } from 'next/server';
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
+  // السماح بجميع API routes - لا نمنعها
+  if (pathname.startsWith('/api/')) {
+    return NextResponse.next();
+  }
+
   // حماية جميع مسارات لوحة التحكم
   if (pathname.startsWith('/management-station')) {
     // السماح بصفحة تسجيل الدخول

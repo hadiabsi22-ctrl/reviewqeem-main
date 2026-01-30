@@ -35,9 +35,13 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
+  console.log('🔐 POST /api/admin/auth/login - Request received');
+  
   try {
     const body = await request.json();
     const { email, password } = body;
+    
+    console.log('📧 Login attempt for:', email);
 
     if (!email || !password) {
       return NextResponse.json(
@@ -79,6 +83,8 @@ export async function POST(request: NextRequest) {
       { expiresIn: '7d' }
     );
 
+    console.log('✅ Login successful for:', email);
+    
     return NextResponse.json({
       success: true,
       message: 'تم تسجيل الدخول بنجاح',
@@ -88,12 +94,13 @@ export async function POST(request: NextRequest) {
       },
     } as ApiResponse);
   } catch (error: any) {
-    console.error('Error in login:', error);
+    console.error('❌ Error in login:', error);
+    console.error('Error stack:', error.stack);
     return NextResponse.json(
       {
         success: false,
         message: 'حدث خطأ أثناء تسجيل الدخول',
-        error: error.message,
+        error: process.env.NODE_ENV === 'development' ? error.message : undefined,
       } as ApiResponse,
       { status: 500 }
     );
