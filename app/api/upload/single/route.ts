@@ -117,7 +117,7 @@ async function handler(req: NextRequest, admin: any) {
         console.log('☁️ Uploading to Supabase Storage...');
         
         const { data, error } = await supabase.storage
-          .from('uploads')
+          .from('game_reviews')
           .upload(`${folderPath}${finalFileName}`, processedBuffer, {
             contentType: processedBuffer.length > 0 ? `image/${finalFileName.split('.').pop() === 'png' ? 'png' : 'webp'}` : file.type,
             upsert: false,
@@ -132,7 +132,7 @@ async function handler(req: NextRequest, admin: any) {
 
         // Get public URL
         const { data: urlData } = supabase.storage
-          .from('uploads')
+          .from('game_reviews')
           .getPublicUrl(`${folderPath}${finalFileName}`);
 
         console.log('✅ File uploaded to Supabase:', urlData.publicUrl);
