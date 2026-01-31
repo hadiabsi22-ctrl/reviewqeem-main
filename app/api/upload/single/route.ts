@@ -12,6 +12,9 @@ import crypto from 'crypto';
 async function handler(req: NextRequest, admin: any) {
   console.log('📤 Upload request received');
   console.log('👤 Admin:', admin?.email || 'Unknown');
+  console.log('🔍 Supabase configured:', !!supabase);
+  console.log('🌐 Supabase URL:', process.env.NEXT_PUBLIC_SUPABASE_URL ? 'Set' : 'Not set');
+  console.log('🔑 Supabase Key:', process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? 'Set' : 'Not set');
   
   try {
     if (req.method !== 'POST') {
@@ -112,12 +115,18 @@ async function handler(req: NextRequest, admin: any) {
     }
 
     // Upload to Supabase Storage if available, otherwise use local storage
+    const BUCKET_NAME = 'game_reviews'; // اسم الحاوية في Supabase
+    
     if (supabase) {
       try {
         console.log('☁️ Uploading to Supabase Storage...');
+        console.log('📦 Bucket name:', BUCKET_NAME);
+        console.log('📁 Folder path:', folderPath);
+        console.log('📄 File name:', finalFileName);
+        console.log('📊 File size:', processedBuffer.length, 'bytes');
         
         const { data, error } = await supabase.storage
-          .from('game_reviews')
+          .from(BUCKET_NAME)
           .upload(`${folderPath}${finalFileName}`, processedBuffer, {
             contentType: processedBuffer.length > 0 ? `image/${finalFileName.split('.').pop() === 'png' ? 'png' : 'webp'}` : file.type,
             upsert: false,
@@ -132,7 +141,7 @@ async function handler(req: NextRequest, admin: any) {
 
         // Get public URL
         const { data: urlData } = supabase.storage
-          .from('game_reviews')
+          .from(BUCKET_NAME)
           .getPublicUrl(`${folderPath}${finalFileName}`);
 
         console.log('✅ File uploaded to Supabase:', urlData.publicUrl);
