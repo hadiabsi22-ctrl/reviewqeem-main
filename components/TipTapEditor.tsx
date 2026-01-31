@@ -23,6 +23,8 @@ export default function TipTapEditor({ content, onChange, placeholder }: TipTapE
         heading: {
           levels: [1, 2, 3],
         },
+        // إزالة Link من StarterKit لتجنب التكرار
+        link: false,
       }),
       Underline,
       Image.configure({
