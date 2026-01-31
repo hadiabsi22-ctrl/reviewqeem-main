@@ -2,6 +2,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/middleware/auth';
+import { supabase } from '@/lib/supabase';
 import { writeFile, mkdir } from 'fs/promises';
 import { join } from 'path';
 import { existsSync } from 'fs';
@@ -48,26 +49,9 @@ async function handler(req: NextRequest, admin: any) {
       );
     }
 
-    // Create uploads directory if it doesn't exist
-    // In Vercel, use /tmp for temporary files, otherwise use uploads/
-    const isVercel = process.env.VERCEL === '1';
-    const uploadsDir = isVercel 
-      ? join('/tmp', 'uploads')
-      : join(process.cwd(), 'uploads');
-    
-    console.log('📂 Upload directory:', uploadsDir);
-    console.log('🌐 Is Vercel:', isVercel);
-    
-    if (!existsSync(uploadsDir)) {
-      console.log('📁 Creating upload directory...');
-      await mkdir(uploadsDir, { recursive: true });
-      console.log('✅ Directory created');
-    }
-
     // Generate unique filename
     const fileExtension = file.name.split('.').pop() || 'jpg';
-    let fileName = `${crypto.randomBytes(16).toString('hex')}-${Date.now()}.${fileExtension}`;
-    const filePath = join(uploadsDir, fileName);
+    const fileName = `${crypto.randomBytes(16).toString('hex')}-${Date.now()}.${fileExtension}`;
 
     // Convert File to Buffer
     const arrayBuffer = await file.arrayBuffer();
@@ -75,6 +59,8 @@ async function handler(req: NextRequest, admin: any) {
 
     // Process image with sharp (resize, optimize)
     let processedBuffer: Buffer = buffer;
+    let finalFileName = fileName;
+    
     try {
       const image = sharp(buffer);
       const metadata = await image.metadata();
@@ -110,21 +96,71 @@ async function handler(req: NextRequest, admin: any) {
       
       // Update file extension if converted to webp
       if (outputFormat === 'webp' && fileExtension !== 'webp') {
-        fileName = fileName.replace(/\.[^.]+$/, '.webp');
+        finalFileName = fileName.replace(/\.[^.]+$/, '.webp');
       }
     } catch (error: any) {
       console.warn('Image processing failed, using original:', error.message);
       processedBuffer = buffer;
     }
 
-    // Save file
-    console.log('💾 Saving file to:', filePath);
-    await writeFile(filePath, processedBuffer);
-    console.log('✅ File saved successfully');
+    // Upload to Supabase Storage if available, otherwise use local storage
+    if (supabase) {
+      console.log('☁️ Uploading to Supabase Storage...');
+      
+      const { data, error } = await supabase.storage
+        .from('uploads')
+        .upload(finalFileName, processedBuffer, {
+          contentType: processedBuffer.length > 0 ? `image/${finalFileName.split('.').pop() === 'png' ? 'png' : 'webp'}` : file.type,
+          upsert: false,
+        });
 
-    // Return URL - use /api/uploads/ for serving files
-    const url = `/api/uploads/${fileName}`;
-    console.log('🔗 File URL:', url);
+      if (error) {
+        console.error('❌ Supabase upload error:', error);
+        throw new Error(`Supabase upload failed: ${error.message}`);
+      }
+
+      // Get public URL
+      const { data: urlData } = supabase.storage
+        .from('uploads')
+        .getPublicUrl(finalFileName);
+
+      console.log('✅ File uploaded to Supabase:', urlData.publicUrl);
+
+      return NextResponse.json({
+        success: true,
+        message: 'تم رفع الصورة بنجاح',
+        url: urlData.publicUrl,
+        fileName: finalFileName,
+      });
+    } else {
+      // Fallback to local storage
+      console.log('💾 Saving file locally (Supabase not configured)...');
+      
+      // Create uploads directory if it doesn't exist
+      const isVercel = process.env.VERCEL === '1';
+      const uploadsDir = isVercel 
+        ? join('/tmp', 'uploads')
+        : join(process.cwd(), 'uploads');
+      
+      if (!existsSync(uploadsDir)) {
+        await mkdir(uploadsDir, { recursive: true });
+      }
+
+      const filePath = join(uploadsDir, finalFileName);
+      await writeFile(filePath, processedBuffer);
+      console.log('✅ File saved locally');
+
+      // Return URL - use /api/uploads/ for serving files
+      const url = `/api/uploads/${finalFileName}`;
+      console.log('🔗 File URL:', url);
+
+      return NextResponse.json({
+        success: true,
+        message: 'تم رفع الصورة بنجاح',
+        url,
+        fileName: finalFileName,
+      });
+    }
 
     return NextResponse.json({
       success: true,
