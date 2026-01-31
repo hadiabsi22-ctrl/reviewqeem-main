@@ -14,6 +14,9 @@ export const metadata: Metadata = {
     description: 'اكتشف أحدث مراجعات الألعاب الاحترافية بالعربية على ReviewQeem.',
     url: process.env.NEXT_PUBLIC_SITE_URL || 'https://reviewqeem.online',
   },
+};
+
+export const viewport = {
   themeColor: '#6c5ce7',
 };
 

@@ -120,7 +120,11 @@ export default class LocalStorage {
     } catch (error: any) {
       // If decryption fails, return empty array (new file)
       if (error.message?.includes('bad decrypt') || error.message?.includes('decrypt')) {
-        if (!silent) console.log(`⚠️  ملف ${this.fileName} جديد أو تالف، سيتم إنشاء ملف جديد`);
+        if (!silent) {
+          console.warn(`⚠️  ملف ${this.fileName} مشفر بمفتاح مختلف أو تالف`);
+          console.warn(`⚠️  سيتم إنشاء ملف جديد. البيانات القديمة لن تكون متاحة.`);
+          console.warn(`⚠️  تأكد من أن ENCRYPTION_KEY في Vercel يطابق المفتاح المحلي.`);
+        }
         return [];
       }
       if (!silent) {
