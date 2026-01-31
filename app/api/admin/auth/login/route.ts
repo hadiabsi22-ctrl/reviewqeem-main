@@ -39,47 +39,57 @@ export async function POST(request: NextRequest) {
   
   try {
     const body = await request.json();
-    const { email, password } = body;
+    const { password } = body;
     
-    console.log('📧 Login attempt for:', email);
+    console.log('🔑 Login attempt with password');
 
-    if (!email || !password) {
+    if (!password) {
       return NextResponse.json(
         {
           success: false,
-          message: 'البريد الإلكتروني وكلمة المرور مطلوبان',
+          message: 'كلمة المرور مطلوبة',
         } as ApiResponse,
         { status: 400 }
       );
     }
 
-    const admin = await AdminLocal.findByEmail(email.toLowerCase().trim());
-
-    if (!admin) {
-      console.log('❌ Admin not found for email:', email);
+    // البحث عن جميع الأدمن والتحقق من كلمة المرور
+    const admins = await AdminLocal.find({});
+    
+    if (admins.length === 0) {
+      console.log('❌ No admins found');
       return NextResponse.json(
         {
           success: false,
-          message: 'البريد الإلكتروني أو كلمة المرور غير صحيحة',
+          message: 'كلمة المرور غير صحيحة',
+        } as ApiResponse,
+        { status: 401 }
+      );
+    }
+
+    // التحقق من كلمة المرور مع جميع الأدمن
+    let admin: AdminLocal | null = null;
+    for (const a of admins) {
+      const isPasswordValid = await a.comparePassword(password);
+      if (isPasswordValid) {
+        admin = a;
+        break;
+      }
+    }
+
+    if (!admin) {
+      console.log('❌ Password incorrect for all admins');
+      return NextResponse.json(
+        {
+          success: false,
+          message: 'كلمة المرور غير صحيحة',
         } as ApiResponse,
         { status: 401 }
       );
     }
 
     console.log('✅ Admin found:', admin.email);
-    
-    const isPasswordValid = await admin.comparePassword(password);
-    console.log('🔑 Password validation result:', isPasswordValid);
-
-    if (!isPasswordValid) {
-      return NextResponse.json(
-        {
-          success: false,
-          message: 'البريد الإلكتروني أو كلمة المرور غير صحيحة',
-        } as ApiResponse,
-        { status: 401 }
-      );
-    }
+    console.log('🔑 Password validation result: true');
 
     const token = jwt.sign(
       { id: admin.id || admin._id, email: admin.email },
@@ -87,7 +97,7 @@ export async function POST(request: NextRequest) {
       { expiresIn: '7d' }
     );
 
-    console.log('✅ Login successful for:', email);
+    console.log('✅ Login successful');
     
     return NextResponse.json({
       success: true,

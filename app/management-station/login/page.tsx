@@ -6,7 +6,7 @@ import styles from './page.module.css';
 
 export default function AdminLoginPage() {
   const router = useRouter();
-  const [formData, setFormData] = useState({ email: '', password: '' });
+  const [formData, setFormData] = useState({ password: '' });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -19,7 +19,7 @@ export default function AdminLoginPage() {
       const response = await fetch('/api/admin/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({ password: formData.password }),
       });
 
       const data = await response.json();
@@ -51,23 +51,14 @@ export default function AdminLoginPage() {
           {error && <div className={styles.error}>{error}</div>}
 
           <div className={styles.formGroup}>
-            <label>البريد الإلكتروني</label>
-            <input
-              type="email"
-              value={formData.email}
-              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              required
-              autoFocus
-            />
-          </div>
-
-          <div className={styles.formGroup}>
             <label>كلمة المرور</label>
             <input
               type="password"
               value={formData.password}
               onChange={(e) => setFormData({ ...formData, password: e.target.value })}
               required
+              autoFocus
+              placeholder="أدخل كلمة المرور"
             />
           </div>
 
