@@ -65,7 +65,8 @@ export default function NewReviewPage() {
     formDataUpload.append('image', file);
 
     try {
-      const response = await fetch('/api/upload/single', {
+      // رفع صورة الغلاف في مجلد covers
+      const response = await fetch('/api/upload/single?folder=covers', {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${token}`,

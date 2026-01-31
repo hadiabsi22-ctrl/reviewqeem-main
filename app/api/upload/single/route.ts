@@ -50,9 +50,16 @@ async function handler(req: NextRequest, admin: any) {
       );
     }
 
-    // Generate unique filename
+    // Generate unique filename with folder organization
     const fileExtension = file.name.split('.').pop() || 'jpg';
-    const fileName = `${crypto.randomBytes(16).toString('hex')}-${Date.now()}.${fileExtension}`;
+    const timestamp = Date.now();
+    const randomHash = crypto.randomBytes(16).toString('hex');
+    const fileName = `${randomHash}-${timestamp}.${fileExtension}`;
+    
+    // Determine folder based on usage (can be passed as query param or default to 'general')
+    const url = new URL(req.url);
+    const folder = url.searchParams.get('folder') || 'general'; // 'covers', 'content', 'general'
+    const folderPath = folder === 'covers' ? 'covers/' : folder === 'content' ? 'content/' : '';
 
     // Convert File to Buffer
     const arrayBuffer = await file.arrayBuffer();
@@ -111,7 +118,7 @@ async function handler(req: NextRequest, admin: any) {
         
         const { data, error } = await supabase.storage
           .from('uploads')
-          .upload(finalFileName, processedBuffer, {
+          .upload(`${folderPath}${finalFileName}`, processedBuffer, {
             contentType: processedBuffer.length > 0 ? `image/${finalFileName.split('.').pop() === 'png' ? 'png' : 'webp'}` : file.type,
             upsert: false,
           });
@@ -126,7 +133,7 @@ async function handler(req: NextRequest, admin: any) {
         // Get public URL
         const { data: urlData } = supabase.storage
           .from('uploads')
-          .getPublicUrl(finalFileName);
+          .getPublicUrl(`${folderPath}${finalFileName}`);
 
         console.log('✅ File uploaded to Supabase:', urlData.publicUrl);
 
@@ -145,11 +152,11 @@ async function handler(req: NextRequest, admin: any) {
     // Fallback to local storage (always available)
     console.log('💾 Saving file locally (Supabase not configured or failed)...');
     
-    // Create uploads directory if it doesn't exist
+    // Create uploads directory with folder structure if it doesn't exist
     const isVercel = process.env.VERCEL === '1';
     const uploadsDir = isVercel 
-      ? join('/tmp', 'uploads')
-      : join(process.cwd(), 'uploads');
+      ? join('/tmp', 'uploads', folderPath)
+      : join(process.cwd(), 'uploads', folderPath);
     
     if (!existsSync(uploadsDir)) {
       await mkdir(uploadsDir, { recursive: true });
@@ -159,8 +166,8 @@ async function handler(req: NextRequest, admin: any) {
     await writeFile(filePath, processedBuffer);
     console.log('✅ File saved locally');
 
-    // Return URL - use /api/uploads/ for serving files
-    const url = `/api/uploads/${finalFileName}`;
+    // Return URL - use /api/uploads/ for serving files with folder path
+    const url = folderPath ? `/api/uploads/${folderPath}${finalFileName}` : `/api/uploads/${finalFileName}`;
     console.log('🔗 File URL:', url);
 
     return NextResponse.json({

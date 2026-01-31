@@ -73,7 +73,8 @@ export default function TipTapEditor({ content, onChange, placeholder }: TipTapE
     formData.append('image', file);
 
     try {
-      const response = await fetch('/api/upload/single', {
+      // رفع صور المحتوى في مجلد content
+      const response = await fetch('/api/upload/single?folder=content', {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${token}`,
