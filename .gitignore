@@ -15,7 +15,8 @@ logs/
 *.log
 
 # Data files (encrypted storage)
-data/*.encrypted
+# Note: encrypted files are now tracked in Git for Vercel deployment
+# data/*.encrypted
 data/*.json
 
 # Uploads
