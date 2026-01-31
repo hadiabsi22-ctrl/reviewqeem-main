@@ -67,7 +67,6 @@ export async function POST(request: NextRequest) {
     }
 
     console.log('✅ Admin found:', admin.email);
-    console.log('🔐 Password hash exists:', admin['data']?.password ? 'Yes' : 'No');
     
     const isPasswordValid = await admin.comparePassword(password);
     console.log('🔑 Password validation result:', isPasswordValid);
