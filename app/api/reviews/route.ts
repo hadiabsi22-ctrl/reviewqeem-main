@@ -81,16 +81,33 @@ async function handler(req: NextRequest, admin: any) {
 
     const review = new ReviewLocal(reviewData);
     console.log('💾 Attempting to save review...');
-    const saveResult = await review.save();
+    console.log('🔑 ENCRYPTION_KEY status:', process.env.ENCRYPTION_KEY ? `Present (${process.env.ENCRYPTION_KEY.length} chars)` : 'Missing');
     
-    console.log('💾 Save result:', saveResult);
-    
-    if (!saveResult) {
-      console.error('❌ Save failed! Review was not saved.');
+    try {
+      const saveResult = await review.save();
+      console.log('💾 Save result:', saveResult);
+      
+      if (!saveResult) {
+        console.error('❌ Save failed! Review was not saved.');
+        console.error('❌ Check ENCRYPTION_KEY and storage permissions');
+        return NextResponse.json(
+          {
+            success: false,
+            message: 'فشل حفظ المراجعة. يرجى التحقق من إعدادات التشفير.',
+            error: process.env.NODE_ENV === 'development' ? 'Save operation returned false' : undefined,
+          } as ApiResponse,
+          { status: 500 }
+        );
+      }
+    } catch (saveError: any) {
+      console.error('❌ Save error:', saveError);
+      console.error('❌ Error message:', saveError.message);
+      console.error('❌ Error stack:', saveError.stack);
       return NextResponse.json(
         {
           success: false,
           message: 'فشل حفظ المراجعة',
+          error: process.env.NODE_ENV === 'development' ? saveError.message : undefined,
         } as ApiResponse,
         { status: 500 }
       );
