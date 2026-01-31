@@ -115,7 +115,8 @@ async function handler(req: NextRequest, admin: any) {
     }
 
     // Upload to Supabase Storage if available, otherwise use local storage
-    const BUCKET_NAME = 'game_reviews'; // اسم الحاوية في Supabase
+    // يمكن تحديد اسم الحاوية من متغير البيئة أو استخدام الافتراضي
+    const BUCKET_NAME = process.env.SUPABASE_BUCKET || 'game_reviews'; // اسم الحاوية في Supabase
     const USE_SUPABASE = process.env.USE_SUPABASE !== 'false' && supabase; // يمكن تعطيل Supabase عبر env
     
     if (USE_SUPABASE) {
