@@ -161,13 +161,6 @@ async function handler(req: NextRequest, admin: any) {
         fileName: finalFileName,
       });
     }
-
-    return NextResponse.json({
-      success: true,
-      message: 'تم رفع الصورة بنجاح',
-      url,
-      fileName,
-    });
   } catch (error: any) {
     console.error('❌ Error uploading image:', error);
     console.error('Error stack:', error.stack);
