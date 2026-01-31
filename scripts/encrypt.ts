@@ -26,18 +26,50 @@ async function encryptData() {
 
     // إعادة تشفير الأدمن
     console.log('\n👤 معالجة حسابات الأدمن...');
-    const admins = await AdminLocal.find({});
-    const adminStorage = new LocalStorage('admins');
+    let admins = await AdminLocal.find({});
     
-    if (admins.length > 0) {
-      const adminsData = admins.map((a: any) => {
-        const obj = a.toObject();
-        return obj;
+    // إنشاء حساب أدمن افتراضي إذا لم يكن موجوداً
+    if (admins.length === 0) {
+      console.log('📝 إنشاء حساب أدمن افتراضي...');
+      const defaultAdmin = new AdminLocal({
+        username: 'admin',
+        email: 'admin@reviewqeem.com',
+        password: 'ReviewQeem2026', // سيتم تشفيرها تلقائياً
+        role: 'admin',
       });
-      adminStorage.write(adminsData);
-      console.log(`✅ تم إعادة تشفير ${admins.length} حساب أدمن`);
-    } else {
-      console.log('⚠️  لا توجد حسابات أدمن لإعادة تشفيرها');
+      await defaultAdmin.save();
+      console.log('✅ تم إنشاء حساب الأدمن الافتراضي');
+      admins = await AdminLocal.find({});
+    }
+    
+    const adminStorage = new LocalStorage('admins');
+    if (admins.length > 0) {
+      // قراءة البيانات الكاملة من storage مباشرة
+      const adminStorageRead = new LocalStorage('admins');
+      const adminsRaw = adminStorageRead.read();
+      
+      if (adminsRaw.length > 0) {
+        adminStorage.write(adminsRaw);
+        console.log(`✅ تم إعادة تشفير ${adminsRaw.length} حساب أدمن`);
+      } else {
+        // إذا لم تكن البيانات موجودة، احفظ البيانات الجديدة
+        const adminsData = await Promise.all(admins.map(async (a: any) => {
+          // الحصول على البيانات الكاملة
+          const adminData = (a as any).data || {};
+          return {
+            _id: adminData._id || adminData.id,
+            id: adminData.id || adminData._id,
+            username: adminData.username || 'admin',
+            email: adminData.email || 'admin@reviewqeem.com',
+            password: adminData.password || '', // password المشفر
+            role: adminData.role || 'admin',
+            createdAt: adminData.createdAt || new Date().toISOString(),
+            updatedAt: adminData.updatedAt || new Date().toISOString(),
+          };
+        }));
+        adminStorage.write(adminsData);
+        console.log(`✅ تم إعادة تشفير ${adminsData.length} حساب أدمن`);
+      }
     }
 
     console.log('\n✨ تمت عملية إعادة التشفير بنجاح!');
