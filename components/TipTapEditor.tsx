@@ -81,7 +81,13 @@ export default function TipTapEditor({ content, onChange, placeholder }: TipTapE
 
       const data = await response.json();
       if (data.success && data.url) {
-        const imagePath = data.url.startsWith('/api/') ? data.url : `/api${data.url}`;
+        // إذا كان URL من Supabase (يبدأ بـ http/https)، استخدمه مباشرة
+        // وإلا استخدم /api/uploads/
+        const imagePath = data.url.startsWith('http://') || data.url.startsWith('https://')
+          ? data.url
+          : data.url.startsWith('/api/')
+          ? data.url
+          : `/api${data.url}`;
         if (editor) {
           editor.chain().focus().setImage({ src: imagePath }).run();
         }
