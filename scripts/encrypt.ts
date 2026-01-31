@@ -26,10 +26,11 @@ async function encryptData() {
 
     // إعادة تشفير الأدمن
     console.log('\n👤 معالجة حسابات الأدمن...');
-    let admins = await AdminLocal.find({});
+    const adminStorage = new LocalStorage('admins');
+    let adminsRaw = adminStorage.read();
     
     // إنشاء حساب أدمن افتراضي إذا لم يكن موجوداً
-    if (admins.length === 0) {
+    if (adminsRaw.length === 0) {
       console.log('📝 إنشاء حساب أدمن افتراضي...');
       const defaultAdmin = new AdminLocal({
         username: 'admin',
@@ -39,37 +40,21 @@ async function encryptData() {
       });
       await defaultAdmin.save();
       console.log('✅ تم إنشاء حساب الأدمن الافتراضي');
-      admins = await AdminLocal.find({});
+      // قراءة البيانات بعد الحفظ مباشرة
+      adminsRaw = adminStorage.read();
     }
     
-    const adminStorage = new LocalStorage('admins');
-    if (admins.length > 0) {
-      // قراءة البيانات الكاملة من storage مباشرة
-      const adminStorageRead = new LocalStorage('admins');
-      const adminsRaw = adminStorageRead.read();
+    if (adminsRaw.length > 0) {
+      // إعادة كتابة البيانات المشفرة بالمفتاح الجديد
+      adminStorage.write(adminsRaw);
+      console.log(`✅ تم إعادة تشفير ${adminsRaw.length} حساب أدمن`);
       
-      if (adminsRaw.length > 0) {
-        adminStorage.write(adminsRaw);
-        console.log(`✅ تم إعادة تشفير ${adminsRaw.length} حساب أدمن`);
-      } else {
-        // إذا لم تكن البيانات موجودة، احفظ البيانات الجديدة
-        const adminsData = await Promise.all(admins.map(async (a: any) => {
-          // الحصول على البيانات الكاملة
-          const adminData = (a as any).data || {};
-          return {
-            _id: adminData._id || adminData.id,
-            id: adminData.id || adminData._id,
-            username: adminData.username || 'admin',
-            email: adminData.email || 'admin@reviewqeem.com',
-            password: adminData.password || '', // password المشفر
-            role: adminData.role || 'admin',
-            createdAt: adminData.createdAt || new Date().toISOString(),
-            updatedAt: adminData.updatedAt || new Date().toISOString(),
-          };
-        }));
-        adminStorage.write(adminsData);
-        console.log(`✅ تم إعادة تشفير ${adminsData.length} حساب أدمن`);
-      }
+      // التحقق من البيانات
+      const testAdmin = adminsRaw[0];
+      console.log(`📧 الإيميل: ${testAdmin.email}`);
+      console.log(`🔐 كلمة المرور مشفرة: ${testAdmin.password ? 'نعم' : 'لا'}`);
+    } else {
+      console.log('⚠️  لا توجد حسابات أدمن لإعادة تشفيرها');
     }
 
     console.log('\n✨ تمت عملية إعادة التشفير بنجاح!');
