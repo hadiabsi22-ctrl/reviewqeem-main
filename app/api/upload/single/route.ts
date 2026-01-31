@@ -116,8 +116,9 @@ async function handler(req: NextRequest, admin: any) {
 
     // Upload to Supabase Storage if available, otherwise use local storage
     const BUCKET_NAME = 'game_reviews'; // اسم الحاوية في Supabase
+    const USE_SUPABASE = process.env.USE_SUPABASE !== 'false' && supabase; // يمكن تعطيل Supabase عبر env
     
-    if (supabase) {
+    if (USE_SUPABASE) {
       try {
         console.log('☁️ Uploading to Supabase Storage...');
         console.log('📦 Bucket name:', BUCKET_NAME);
@@ -125,24 +126,30 @@ async function handler(req: NextRequest, admin: any) {
         console.log('📄 File name:', finalFileName);
         console.log('📊 File size:', processedBuffer.length, 'bytes');
         
+        const uploadPath = folderPath ? `${folderPath}${finalFileName}` : finalFileName;
+        console.log('📤 Upload path:', uploadPath);
+        
         const { data, error } = await supabase.storage
           .from(BUCKET_NAME)
-          .upload(`${folderPath}${finalFileName}`, processedBuffer, {
+          .upload(uploadPath, processedBuffer, {
             contentType: processedBuffer.length > 0 ? `image/${finalFileName.split('.').pop() === 'png' ? 'png' : 'webp'}` : file.type,
             upsert: false,
           });
 
         if (error) {
           console.error('❌ Supabase upload error:', error);
+          console.error('❌ Error details:', JSON.stringify(error, null, 2));
           // Fallback to local storage if Supabase fails
           console.log('⚠️ Falling back to local storage due to Supabase error');
           throw new Error(`Supabase upload failed: ${error.message}`);
         }
 
+        console.log('✅ Upload successful, getting public URL...');
+
         // Get public URL
         const { data: urlData } = supabase.storage
           .from(BUCKET_NAME)
-          .getPublicUrl(`${folderPath}${finalFileName}`);
+          .getPublicUrl(uploadPath);
 
         console.log('✅ File uploaded to Supabase:', urlData.publicUrl);
 
@@ -154,8 +161,12 @@ async function handler(req: NextRequest, admin: any) {
         });
       } catch (supabaseError: any) {
         console.error('❌ Supabase error, falling back to local storage:', supabaseError);
+        console.error('❌ Error message:', supabaseError.message);
+        console.error('❌ Error stack:', supabaseError.stack);
         // Continue to local storage fallback
       }
+    } else {
+      console.log('ℹ️ Supabase disabled or not configured, using local storage');
     }
     
     // Fallback to local storage (always available)
