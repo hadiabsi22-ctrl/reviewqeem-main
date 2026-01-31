@@ -56,8 +56,10 @@ export async function POST(request: NextRequest) {
     // البحث عن جميع الأدمن والتحقق من كلمة المرور
     const admins = await AdminLocal.find({});
     
+    console.log(`📊 Found ${admins.length} admin(s)`);
+    
     if (admins.length === 0) {
-      console.log('❌ No admins found');
+      console.log('❌ No admins found in database');
       return NextResponse.json(
         {
           success: false,
@@ -70,15 +72,23 @@ export async function POST(request: NextRequest) {
     // التحقق من كلمة المرور مع جميع الأدمن
     let admin: AdminLocal | null = null;
     for (const a of admins) {
+      console.log(`🔍 Checking admin: ${a.email || a.username || 'unknown'}`);
+      const hasPassword = (a as any).data?.password || '';
+      console.log(`🔐 Has password hash: ${hasPassword ? 'Yes (' + hasPassword.substring(0, 20) + '...)' : 'No'}`);
+      
       const isPasswordValid = await a.comparePassword(password);
+      console.log(`🔑 Password check result: ${isPasswordValid}`);
+      
       if (isPasswordValid) {
         admin = a;
+        console.log(`✅ Password matched for admin: ${a.email || a.username}`);
         break;
       }
     }
 
     if (!admin) {
       console.log('❌ Password incorrect for all admins');
+      console.log(`💡 Expected password: ReviewQeem2026`);
       return NextResponse.json(
         {
           success: false,
