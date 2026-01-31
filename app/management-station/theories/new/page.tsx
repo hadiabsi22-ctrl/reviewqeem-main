@@ -10,6 +10,7 @@ export default function NewTheoryPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState(false);
   const [formData, setFormData] = useState({
     title: '',
     slug: '',
@@ -110,7 +111,11 @@ export default function NewTheoryPage() {
 
       const data = await response.json();
       if (data.success) {
-        router.push('/management-station/theories');
+        setSuccess(true);
+        // إظهار رسالة النجاح ثم إعادة التوجيه بعد ثانيتين
+        setTimeout(() => {
+          router.push('/management-station/theories');
+        }, 2000);
       } else {
         setError(data.message || 'فشل إنشاء النظرية');
       }
@@ -135,6 +140,11 @@ export default function NewTheoryPage() {
 
       <main className={styles.main}>
         {error && <div className={styles.error}>{error}</div>}
+        {success && (
+          <div className={styles.success}>
+            ✅ تم النشر بنجاح! جاري إعادة التوجيه...
+          </div>
+        )}
 
         <form onSubmit={handleSubmit} className={styles.form}>
           <div className={styles.section}>

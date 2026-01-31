@@ -7,9 +7,31 @@ import styles from './page.module.css';
 
 async function getAllTheories(): Promise<Review[]> {
   try {
-    // قسم النظريات فارغ - لا توجد نظريات بعد
-    // سيتم إضافة النظريات لاحقاً من لوحة التحكم
-    return [];
+    // جلب جميع المراجعات المنشورة
+    const allReviews = await ReviewLocal.find({ status: 'published' });
+    
+    // فلترة النظريات: النظريات هي المراجعات التي ليس لها pros و cons
+    const theories = allReviews
+      .map((r) => r.toObject())
+      .filter((review) => {
+        // النظريات: pros و cons فارغين أو غير موجودين
+        const prosArray = review.pros || [];
+        const consArray = review.cons || [];
+        const hasNoPros = !Array.isArray(prosArray) || prosArray.length === 0;
+        const hasNoCons = !Array.isArray(consArray) || consArray.length === 0;
+        return hasNoPros && hasNoCons;
+      })
+      .sort((a, b) => {
+        const dateA = new Date(a.createdAt).getTime();
+        const dateB = new Date(b.createdAt).getTime();
+        return dateB - dateA; // الأحدث أولاً
+      });
+    
+    console.log(`📚 Found ${allReviews.length} published reviews, ${theories.length} are theories`);
+    if (theories.length > 0) {
+      console.log(`📖 Theories:`, theories.map(t => ({ title: t.title, pros: t.pros?.length || 0, cons: t.cons?.length || 0 })));
+    }
+    return theories;
   } catch (error) {
     console.error('Error fetching theories:', error);
     return [];

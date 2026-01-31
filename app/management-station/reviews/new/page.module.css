@@ -48,6 +48,29 @@
   border: 1px solid var(--danger);
 }
 
+.success {
+  background: rgba(46, 213, 115, 0.2);
+  color: #2ed573;
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  border: 1px solid #2ed573;
+  font-weight: 600;
+  text-align: center;
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .form {
   background: var(--card-bg);
   border-radius: var(--radius-md);

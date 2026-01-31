@@ -29,9 +29,27 @@ export default function AdminTheoriesPage() {
       .then((res) => res.json())
       .then((data) => {
         if (data.success) {
-          // قسم النظريات فارغ - لا توجد نظريات بعد
-          // سيتم إضافة النظريات لاحقاً من صفحة "إنشاء نظرية جديدة"
-          setTheories([]);
+          // فلترة النظريات: النظريات هي المراجعات التي ليس لها pros و cons
+          const allItems = data.reviews || data.data || [];
+          console.log(`📚 Total items loaded: ${allItems.length}`);
+          
+          const theoriesOnly = allItems.filter((item: Review) => {
+            // النظريات: pros و cons فارغين أو غير موجودين
+            const prosArray = item.pros || [];
+            const consArray = item.cons || [];
+            const hasNoPros = !Array.isArray(prosArray) || prosArray.length === 0;
+            const hasNoCons = !Array.isArray(consArray) || consArray.length === 0;
+            const isTheory = hasNoPros && hasNoCons;
+            
+            if (isTheory) {
+              console.log(`📖 Theory found: "${item.title}" (pros: ${prosArray.length}, cons: ${consArray.length})`);
+            }
+            
+            return isTheory;
+          });
+          
+          console.log(`✅ Filtered: ${theoriesOnly.length} theories out of ${allItems.length} items`);
+          setTheories(theoriesOnly);
         } else {
           setError(data.message || 'فشل تحميل النظريات');
         }

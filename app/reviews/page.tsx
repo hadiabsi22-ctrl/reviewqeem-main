@@ -7,15 +7,24 @@ import styles from './page.module.css';
 
 async function getAllReviews(): Promise<Review[]> {
   try {
-    const reviews = await ReviewLocal.find({ status: 'published' });
-    // عرض جميع المراجعات المنشورة بدون تصفية
-    return reviews
+    const allReviews = await ReviewLocal.find({ status: 'published' });
+    
+    // فلترة المراجعات فقط: المراجعات التي لها pros أو cons
+    const reviewsOnly = allReviews
       .map((r) => r.toObject())
+      .filter((review) => {
+        const hasPros = review.pros && review.pros.length > 0;
+        const hasCons = review.cons && review.cons.length > 0;
+        return hasPros || hasCons; // مراجعة إذا كان لها pros أو cons
+      })
       .sort((a, b) => {
         const dateA = new Date(a.createdAt).getTime();
         const dateB = new Date(b.createdAt).getTime();
         return dateB - dateA; // الأحدث أولاً
       });
+    
+    console.log(`📚 Found ${allReviews.length} published items, ${reviewsOnly.length} are reviews`);
+    return reviewsOnly;
   } catch (error) {
     console.error('Error fetching reviews:', error);
     return [];

@@ -13,8 +13,9 @@ async function handler(req: NextRequest, admin: any) {
   console.log('📤 Upload request received');
   console.log('👤 Admin:', admin?.email || 'Unknown');
   console.log('🔍 Supabase configured:', !!supabase);
-  console.log('🌐 Supabase URL:', process.env.NEXT_PUBLIC_SUPABASE_URL ? 'Set' : 'Not set');
-  console.log('🔑 Supabase Key:', process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? 'Set' : 'Not set');
+  console.log('🌐 Supabase URL:', process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL ? 'Set' : 'Not set');
+  console.log('🔑 Supabase Key:', process.env.SUPABASE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? 'Set' : 'Not set');
+  console.log('📦 Bucket from env:', process.env.SUPABASE_BUCKET || 'Not set (using default: game_reviews)');
   
   try {
     if (req.method !== 'POST') {
@@ -60,8 +61,8 @@ async function handler(req: NextRequest, admin: any) {
     const fileName = `${randomHash}-${timestamp}.${fileExtension}`;
     
     // Determine folder based on usage (can be passed as query param or default to 'general')
-    const url = new URL(req.url);
-    const folder = url.searchParams.get('folder') || 'general'; // 'covers', 'content', 'general'
+    const requestUrl = new URL(req.url);
+    const folder = requestUrl.searchParams.get('folder') || 'general'; // 'covers', 'content', 'general'
     const folderPath = folder === 'covers' ? 'covers/' : folder === 'content' ? 'content/' : '';
 
     // Convert File to Buffer
@@ -119,7 +120,7 @@ async function handler(req: NextRequest, admin: any) {
     const BUCKET_NAME = process.env.SUPABASE_BUCKET || 'game_reviews'; // اسم الحاوية في Supabase
     const USE_SUPABASE = process.env.USE_SUPABASE !== 'false' && supabase; // يمكن تعطيل Supabase عبر env
     
-    if (USE_SUPABASE) {
+    if (USE_SUPABASE && supabase) {
       try {
         console.log('☁️ Uploading to Supabase Storage...');
         console.log('📦 Bucket name:', BUCKET_NAME);
@@ -130,11 +131,16 @@ async function handler(req: NextRequest, admin: any) {
         const uploadPath = folderPath ? `${folderPath}${finalFileName}` : finalFileName;
         console.log('📤 Upload path:', uploadPath);
         
-        const { data, error } = await supabase.storage
+        // تحديد content type بشكل صحيح
+        const fileExt = finalFileName.split('.').pop()?.toLowerCase();
+        const contentType = fileExt === 'png' ? 'image/png' : fileExt === 'webp' ? 'image/webp' : fileExt === 'jpg' || fileExt === 'jpeg' ? 'image/jpeg' : file.type;
+        
+        const { data: uploadData, error } = await supabase.storage
           .from(BUCKET_NAME)
           .upload(uploadPath, processedBuffer, {
-            contentType: processedBuffer.length > 0 ? `image/${finalFileName.split('.').pop() === 'png' ? 'png' : 'webp'}` : file.type,
+            contentType: contentType,
             upsert: false,
+            cacheControl: '3600',
           });
 
         if (error) {
@@ -142,24 +148,24 @@ async function handler(req: NextRequest, admin: any) {
           console.error('❌ Error details:', JSON.stringify(error, null, 2));
           // Fallback to local storage if Supabase fails
           console.log('⚠️ Falling back to local storage due to Supabase error');
-          throw new Error(`Supabase upload failed: ${error.message}`);
+          // لا نرمي خطأ، بل نتابع إلى local storage
+        } else {
+          console.log('✅ Upload successful, getting public URL...');
+
+          // Get public URL
+          const { data: urlData } = supabase.storage
+            .from(BUCKET_NAME)
+            .getPublicUrl(uploadPath);
+
+          console.log('✅ File uploaded to Supabase:', urlData.publicUrl);
+
+          return NextResponse.json({
+            success: true,
+            message: 'تم رفع الصورة بنجاح',
+            url: urlData.publicUrl,
+            fileName: finalFileName,
+          });
         }
-
-        console.log('✅ Upload successful, getting public URL...');
-
-        // Get public URL
-        const { data: urlData } = supabase.storage
-          .from(BUCKET_NAME)
-          .getPublicUrl(uploadPath);
-
-        console.log('✅ File uploaded to Supabase:', urlData.publicUrl);
-
-        return NextResponse.json({
-          success: true,
-          message: 'تم رفع الصورة بنجاح',
-          url: urlData.publicUrl,
-          fileName: finalFileName,
-        });
       } catch (supabaseError: any) {
         console.error('❌ Supabase error, falling back to local storage:', supabaseError);
         console.error('❌ Error message:', supabaseError.message);
@@ -171,32 +177,44 @@ async function handler(req: NextRequest, admin: any) {
     }
     
     // Fallback to local storage (always available)
-    console.log('💾 Saving file locally (Supabase not configured or failed)...');
-    
-    // Create uploads directory with folder structure if it doesn't exist
-    const isVercel = process.env.VERCEL === '1';
-    const uploadsDir = isVercel 
-      ? join('/tmp', 'uploads', folderPath)
-      : join(process.cwd(), 'uploads', folderPath);
-    
-    if (!existsSync(uploadsDir)) {
-      await mkdir(uploadsDir, { recursive: true });
+    try {
+      console.log('💾 Saving file locally (Supabase not configured or failed)...');
+      
+      // Create uploads directory with folder structure if it doesn't exist
+      const isVercel = process.env.VERCEL === '1';
+      const uploadsDir = isVercel 
+        ? join('/tmp', 'uploads', folderPath)
+        : join(process.cwd(), 'uploads', folderPath);
+      
+      console.log('📁 Upload directory:', uploadsDir);
+      
+      if (!existsSync(uploadsDir)) {
+        console.log('📁 Creating directory:', uploadsDir);
+        await mkdir(uploadsDir, { recursive: true });
+        console.log('✅ Directory created');
+      }
+
+      const filePath = join(uploadsDir, finalFileName);
+      console.log('💾 Writing file to:', filePath);
+      await writeFile(filePath, processedBuffer);
+      console.log('✅ File saved locally');
+
+      // Return URL - use /api/uploads/ for serving files with folder path
+      const url = folderPath ? `/api/uploads/${folderPath}${finalFileName}` : `/api/uploads/${finalFileName}`;
+      console.log('🔗 File URL:', url);
+
+      return NextResponse.json({
+        success: true,
+        message: 'تم رفع الصورة بنجاح',
+        url,
+        fileName: finalFileName,
+      });
+    } catch (localError: any) {
+      console.error('❌ Local storage error:', localError);
+      console.error('❌ Error message:', localError.message);
+      console.error('❌ Error stack:', localError.stack);
+      throw localError; // Re-throw to be caught by outer catch
     }
-
-    const filePath = join(uploadsDir, finalFileName);
-    await writeFile(filePath, processedBuffer);
-    console.log('✅ File saved locally');
-
-    // Return URL - use /api/uploads/ for serving files with folder path
-    const url = folderPath ? `/api/uploads/${folderPath}${finalFileName}` : `/api/uploads/${finalFileName}`;
-    console.log('🔗 File URL:', url);
-
-    return NextResponse.json({
-      success: true,
-      message: 'تم رفع الصورة بنجاح',
-      url,
-      fileName: finalFileName,
-    });
   } catch (error: any) {
     console.error('❌ Error uploading image:', error);
     console.error('Error stack:', error.stack);

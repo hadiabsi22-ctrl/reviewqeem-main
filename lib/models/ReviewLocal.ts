@@ -55,10 +55,18 @@ export class ReviewLocal {
     // هل هذا سجل جديد أم موجود مسبقاً؟
     const isNew = !this.data._id && !this.data.id;
 
+    console.log('💾 Saving review:', {
+      isNew,
+      id: this.data._id || this.data.id,
+      title: this.data.title,
+      status: this.data.status,
+    });
+
     if (isNew) {
       const id = crypto.randomBytes(16).toString('hex');
       this.data._id = id;
       this.data.id = id;
+      console.log('🆕 New review, generated ID:', id);
     }
 
     if (!this.data.createdAt) {
@@ -66,14 +74,31 @@ export class ReviewLocal {
     }
     this.data.updatedAt = new Date().toISOString();
 
+    let result: boolean;
     if (isNew) {
       // أول مرة → إدخال جديد في التخزين المحلي
-      return storage.insert(this.data);
+      result = storage.insert(this.data);
+      console.log('📝 Insert result:', result);
     } else {
       // سجل موجود → تحديثه
       const id = this.data._id || this.data.id;
-      return storage.update({ _id: id }, this.data);
+      result = storage.update({ _id: id }, this.data);
+      console.log('🔄 Update result:', result);
     }
+
+    // التحقق من أن البيانات تم حفظها
+    const allData = storage.read();
+    console.log('📊 Total reviews in storage:', allData.length);
+    if (allData.length > 0) {
+      const lastReview = allData[allData.length - 1];
+      console.log('📋 Last review in storage:', {
+        title: lastReview.title,
+        status: lastReview.status,
+        id: lastReview._id || lastReview.id,
+      });
+    }
+
+    return result;
   }
 
   // Static methods

@@ -15,6 +15,7 @@ export default function EditReviewPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState(false);
   const [formData, setFormData] = useState({
     title: '',
     slug: '',
@@ -179,7 +180,11 @@ export default function EditReviewPage() {
 
       const data = await response.json();
       if (data.success) {
-        router.push('/management-station/reviews');
+        setSuccess(true);
+        // إظهار رسالة النجاح ثم إعادة التوجيه بعد ثانيتين
+        setTimeout(() => {
+          router.push('/management-station/reviews');
+        }, 2000);
       } else {
         setError(data.message || 'فشل تحديث المراجعة');
       }
@@ -241,6 +246,11 @@ export default function EditReviewPage() {
 
       <main className={styles.main}>
         {error && <div className={styles.error}>{error}</div>}
+        {success && (
+          <div className={styles.success}>
+            ✅ تم التحديث بنجاح! جاري إعادة التوجيه...
+          </div>
+        )}
 
         <form onSubmit={handleSubmit} className={styles.form}>
           <div className={styles.section}>

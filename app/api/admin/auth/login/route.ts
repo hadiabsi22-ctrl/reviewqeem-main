@@ -73,16 +73,25 @@ export async function POST(request: NextRequest) {
     let admin: AdminLocal | null = null;
     for (const a of admins) {
       console.log(`🔍 Checking admin: ${a.email || a.username || 'unknown'}`);
-      const hasPassword = (a as any).data?.password || '';
-      console.log(`🔐 Has password hash: ${hasPassword ? 'Yes (' + hasPassword.substring(0, 20) + '...)' : 'No'}`);
+      console.log(`🔍 Admin ID: ${a.id || a._id}`);
       
-      const isPasswordValid = await a.comparePassword(password);
-      console.log(`🔑 Password check result: ${isPasswordValid}`);
-      
-      if (isPasswordValid) {
-        admin = a;
-        console.log(`✅ Password matched for admin: ${a.email || a.username}`);
-        break;
+      try {
+        // التحقق من كلمة المرور مباشرة
+        const isPasswordValid = await a.comparePassword(password);
+        console.log(`🔑 Password check result: ${isPasswordValid}`);
+        console.log(`🔑 Password entered: ${password.substring(0, 5)}...`);
+        
+        if (isPasswordValid) {
+          admin = a;
+          console.log(`✅ Password matched for admin: ${a.email || a.username}`);
+          break;
+        } else {
+          console.log(`❌ Password did not match for admin: ${a.email || a.username}`);
+        }
+      } catch (err: any) {
+        console.error(`❌ Error checking admin ${a.email}:`, err.message);
+        console.error(`❌ Error stack:`, err.stack);
+        continue;
       }
     }
 

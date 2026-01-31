@@ -57,8 +57,8 @@ async function handler(req: NextRequest, admin: any) {
       rating: Math.max(0, Math.min(10, parseFloat(body.rating) || 0)),
       tags: Array.isArray(body.genre) ? body.genre : [],
       category: Array.isArray(body.genre) && body.genre.length > 0 ? body.genre[0] : '',
-      pros: Array.isArray(body.pros) ? body.pros.filter((p: string) => p.trim()) : [],
-      cons: Array.isArray(body.cons) ? body.cons.filter((c: string) => c.trim()) : [],
+      pros: Array.isArray(body.pros) ? body.pros.filter((p: string) => p && p.trim()) : [],
+      cons: Array.isArray(body.cons) ? body.cons.filter((c: string) => c && c.trim()) : [],
       status: body.status || 'draft',
       featured: body.featured === true,
       coverImage: body.coverImage || '',
@@ -72,8 +72,69 @@ async function handler(req: NextRequest, admin: any) {
 
     reviewData.id = reviewData._id;
 
+    console.log('📝 Creating review with data:', {
+      title: reviewData.title,
+      slug: reviewData.slug,
+      status: reviewData.status,
+      id: reviewData._id,
+    });
+
     const review = new ReviewLocal(reviewData);
-    await review.save();
+    console.log('💾 Attempting to save review...');
+    const saveResult = await review.save();
+    
+    console.log('💾 Save result:', saveResult);
+    
+    if (!saveResult) {
+      console.error('❌ Save failed! Review was not saved.');
+      return NextResponse.json(
+        {
+          success: false,
+          message: 'فشل حفظ المراجعة',
+        } as ApiResponse,
+        { status: 500 }
+      );
+    }
+    
+    // التحقق من أن المراجعة تم حفظها - انتظر قليلاً ثم اقرأ
+    await new Promise(resolve => setTimeout(resolve, 200));
+    
+    // جلب جميع المراجعات للتحقق
+    const allReviews = await ReviewLocal.find({});
+    console.log(`📚 Total reviews after save: ${allReviews.length}`);
+    
+    const savedReview = allReviews.find(r => {
+      const obj = r.toObject();
+      return (obj._id || obj.id) === reviewData._id;
+    });
+    
+    console.log('✅ Saved review found:', savedReview ? 'Yes' : 'No');
+    if (savedReview) {
+      const savedObj = savedReview.toObject();
+      const prosCount = Array.isArray(savedObj.pros) ? savedObj.pros.length : 0;
+      const consCount = Array.isArray(savedObj.cons) ? savedObj.cons.length : 0;
+      const isTheory = prosCount === 0 && consCount === 0;
+      
+      console.log('📋 Saved review data:', {
+        title: savedObj.title,
+        status: savedObj.status,
+        id: savedObj._id || savedObj.id,
+        pros: prosCount,
+        cons: consCount,
+        type: isTheory ? 'Theory' : 'Review',
+      });
+    } else {
+      console.log('⚠️ Review not found after save!');
+      console.log('🔍 Searching for review with ID:', reviewData._id);
+      allReviews.forEach((r, idx) => {
+        const obj = r.toObject();
+        console.log(`  Review ${idx}:`, {
+          id: obj._id || obj.id,
+          title: obj.title,
+          status: obj.status,
+        });
+      });
+    }
 
     return NextResponse.json({
       success: true,

@@ -10,6 +10,7 @@ export default function NewReviewPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState(false);
   const [formData, setFormData] = useState({
     title: '',
     slug: '',
@@ -149,7 +150,11 @@ export default function NewReviewPage() {
 
       const data = await response.json();
       if (data.success) {
-        router.push('/management-station/reviews');
+        setSuccess(true);
+        // إظهار رسالة النجاح ثم إعادة التوجيه بعد ثانيتين
+        setTimeout(() => {
+          router.push('/management-station/reviews');
+        }, 2000);
       } else {
         setError(data.message || 'فشل إنشاء المراجعة');
       }
@@ -174,6 +179,11 @@ export default function NewReviewPage() {
 
       <main className={styles.main}>
         {error && <div className={styles.error}>{error}</div>}
+        {success && (
+          <div className={styles.success}>
+            ✅ تم النشر بنجاح! جاري إعادة التوجيه...
+          </div>
+        )}
 
         <form onSubmit={handleSubmit} className={styles.form}>
           <div className={styles.section}>
