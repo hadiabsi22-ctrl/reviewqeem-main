@@ -9,7 +9,8 @@
     "start": "next start -p 3001",
     "lint": "next lint",
     "type-check": "tsc --noEmit",
-    "encrypt": "tsx scripts/encrypt.ts"
+    "encrypt": "tsx scripts/encrypt.ts",
+    "test-password": "tsx scripts/test-password.ts"
   },
   "engines": {
     "node": "20.x"
